@@ -1,0 +1,54 @@
+{
+  "name": "kc-wallet-svc",
+  "version": "0.0.1",
+  "private": "true",
+  "main": "server.js",
+  "scripts": {
+    "test": "mocha --exit tests/*",
+    "start": "node bin/www"
+  },
+  "keywords": [
+    "nodejs",
+    "wallet",
+    "ethers"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "author": "KC Engineers",
+  "devDependencies": {
+    "mocha": "^10.2.0",
+    "nodemon": "^3.1.10",
+    "sequelize-cli": "^6.6.3",
+    "supertest": "^6.3.4"
+  },
+  "dependencies": {
+    "@google-cloud/secret-manager": "^6.1.1",
+    "axios": "^1.13.1",
+    "bcrypt": "^6.0.0",
+    "bignumber.js": "^9.3.1",
+    "body-parser": "^2.2.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^17.2.3",
+    "ether-converter": "^0.0.16",
+    "ethereumjs-util": "^7.1.5",
+    "ethers": "^6.15.0",
+    "express": "^4.18.2",
+    "http-status-codes": "^2.3.0",
+    "joi": "^18.0.1",
+    "lodash": "^4.17.21",
+    "path": "^0.12.7",
+    "randomatic": "^3.1.1",
+    "sequelize": "^6.37.7",
+    "signale": "^1.4.0",
+    "tmp": "^0.2.5",
+    "url-parse": "^1.5.10",
+    "uuid": "^13.0.0",
+    "web3": "^4.16.0",
+    "web3-provider-engine": "^17.0.1",
+    "web3-utils": "^4.3.3",
+    "winston": "^3.18.3"
+  }
+}
