@@ -1,6 +1,8 @@
 require("dotenv").config();
 
-const { Platform } = require("../databases/models/plaform");
+const models = require('../databases/models/index');
+const Platform = models.Platform;
+
 const { StatusCodes } = require('http-status-codes');
 const { responseWrapper } = require("../utils/helper");
 
@@ -13,8 +15,8 @@ const sampleApplicationAccess = async (req, res, next) => {
 
 const authMiddleware = async (req, res, next) => {
     try {
-        const authToken = req.headers['Authorization'];
-        const accessKey = req.headers['x-wallet-access-key'];
+        const authToken = req.headers['authorization'] || req.get('authorization');
+        const accessKey = req.headers['x-wallet-access-key'] || req.get('x-wallet-access-key');
 
         // Check presence
         if (!accessKey || !authToken) {
@@ -26,9 +28,8 @@ const authMiddleware = async (req, res, next) => {
             );
         }
 
-        // Extract and verify bearer token
-        const token = authToken.split(' ')[1];
-        if (!token) {
+        const [scheme, token] = authToken.split(' ');
+        if (scheme !== 'Bearer' || !token) {
             return responseWrapper(
                 res,
                 false,
@@ -38,7 +39,7 @@ const authMiddleware = async (req, res, next) => {
         }
 
         // Validate access key and auth token
-        const keyRecord = await Platform.findOne({ where: { accessKey: accessKey, token: token } });
+        const keyRecord = await Platform.findOne({ where: { accessKey, token } });
         if (!keyRecord) {
             return responseWrapper(
                 res,
