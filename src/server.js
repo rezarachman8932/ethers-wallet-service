@@ -20,6 +20,10 @@ app.group("/api/v1/", (appRouter) => {
   appRouter.use('/platform', platformRoutes);
 });
 
+app.get('/', (req, res) => {
+  res.status(200).json({ message: 'Hello World!' });
+});
+
 app.get("/check-health", async (req, res) => {
     try {
         await sequelize.authenticate();
