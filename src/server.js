@@ -13,7 +13,7 @@ const port = process.env.NODE_PORT || 3020;
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(cors());
 app.options('*', cors());
-app.use(express.json());
+// app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.group("/api/v1/", (appRouter) => {
