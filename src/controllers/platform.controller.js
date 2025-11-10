@@ -40,6 +40,13 @@ const createPlatform = async (req, res) => {
       token
     });
 
+    await AuditrailService.create({
+        action: AUDIT_ACTION.CREATE_PLATFORM,
+        header: req.headers,
+        body: req.body,
+        ipAddress: req.ip
+    });
+
     return responseWrapper(res, true, 201, 'Platform created successfully!', newPlatform);
   } catch (err) {
     return responseWrapper(res, false, 500, err.message);
