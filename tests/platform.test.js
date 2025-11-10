@@ -6,26 +6,35 @@ const { execSync } = require('child_process');
 const models = require('../src/databases/models');
 const Platform = models.Platform;
 const Auditrail = models.Auditrail;
+const crypto = require("crypto");
+const { generatePlatformCredentials } = require('../src/utils/helper'); 
+const { generateToken } = require('../src/utils/helper');
 
 describe('GET /api/v1/platform', () => {
 
-  let validAccessKey, validToken;
+  let validAccessKey, validToken, validUuid;
 
   before(async function() {
-    // Extend timeout for DB setup
-    this.timeout(10000); 
+    this.timeout(10000);
 
-    // Reset DB using Sequelize CLI migrations
+    // Reset DB
     execSync('npx sequelize-cli db:drop', { stdio: 'inherit' });
     execSync('npx sequelize-cli db:create', { stdio: 'inherit' });
     execSync('npx sequelize-cli db:migrate', { stdio: 'inherit' });
 
-    // Seed a platform
+    // Generate platform credentials
+    const { uuid, accessKey, token } = generatePlatformCredentials();
+
+    previousUUID = uuid;
+    previousAccessKey = accessKey;
+
+    // Seed the Platform
     const platform = await Platform.create({
+      uuid,
       name: 'Sample Platform',
       description: 'Test description',
-      token: '5873495347534HSJAH898',
-      accessKey: '479823789GHFFF84332KJHDFKJH',
+      token,
+      accessKey,
     });
 
     validAccessKey = platform.accessKey;
@@ -51,6 +60,7 @@ describe('GET /api/v1/platform', () => {
     assert.equal(res.type, 'application/json');
     assert.equal(res.body.status, true);
     assert.equal(res.body.message, 'get platform successfully!');
+    assert.equal(generateToken(previousUUID, previousAccessKey), validToken);
     assert.ok(Array.isArray(res.body.contents));
     assert.equal(res.body.contents.length, 1);
 
@@ -68,16 +78,29 @@ describe('GET /api/v1/platform', () => {
     assert.ok(res.body.message.includes('Missing'));
   });
 
-  it('should fail with 403 when credentials are invalid', async function () {
+  it('should fail with 403 when invalid token for valid access key', async function () {
+    const wrongToken = crypto.createHash('sha256').update('fake:combo').digest('hex');
+
     const res = await request(app)
       .get('/api/v1/platform')
       .set('Accept', 'application/json')
-      .set('x-wallet-access-key', 'wrong-access')
-      .set('authorization', 'Bearer wrong-token');
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', 'Bearer ' + wrongToken);
+    
+    assert.equal(res.status, 403);
+    assert.equal(res.body.status, false);
+    assert.ok(res.body.message.includes('or auth token!'));
+  });
+
+  it('should fail with 403 when access key not found', async function () {
+    const res = await request(app)
+      .get('/api/v1/platform')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', 'non-existent-access-key')
+      .set('authorization', 'Bearer ' + validToken);
 
     assert.equal(res.status, 403);
     assert.equal(res.body.status, false);
-    assert.ok(res.body.message.includes('Invalid'));
+    assert.ok(res.body.message.includes('Invalid access key'));
   });
-
 });

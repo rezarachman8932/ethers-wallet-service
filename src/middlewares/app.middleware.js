@@ -28,6 +28,7 @@ const authMiddleware = async (req, res, next) => {
             );
         }
 
+        // Extract token from "Bearer <token>" format
         const [scheme, token] = authToken.split(' ');
         if (scheme !== 'Bearer' || !token) {
             return responseWrapper(
@@ -38,7 +39,7 @@ const authMiddleware = async (req, res, next) => {
             );
         }
 
-        // Validate access key and auth token
+        // Find platform by access key and token
         const keyRecord = await Platform.findOne({ where: { accessKey, token } });
         if (!keyRecord) {
             return responseWrapper(

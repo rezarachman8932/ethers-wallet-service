@@ -53,6 +53,22 @@ const compareBcryptHash = (hashBcrypt, words) => {
     return result;
 }
 
+const generateToken = (uuid, accessKey) => {
+  const combined = `${uuid}:${accessKey}`;
+  return crypto.createHash('sha256').update(combined).digest('hex');
+};
+
+/**
+ * Generate Token — hashed from UUID + AccessKey
+ * @returns {Object} { uuid, accessKey, token }
+ */
+const generatePlatformCredentials = () => {
+  const uuid = crypto.randomUUID();
+  const accessKey = makeid(32);
+  const token = generateToken(uuid, accessKey);
+  return { uuid, accessKey, token };
+};
+
 /**
  * responseWrapper
  * json response wrapper
@@ -84,5 +100,7 @@ module.exports = {
     toBuf,
     generateBcryptHash,
     compareBcryptHash,
-    responseWrapper
+    responseWrapper,
+    generateToken,
+    generatePlatformCredentials,
 };
