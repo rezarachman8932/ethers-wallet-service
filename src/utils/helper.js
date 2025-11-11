@@ -69,27 +69,6 @@ const generatePlatformCredentials = () => {
   return { uuid, accessKey, token };
 };
 
-/**
- * responseWrapper
- * json response wrapper
- * @param {*} res 
- * @param {Boolean} status 
- * @param {Int} code 
- * @param {String} message 
- * @param {*} contents 
- * @returns JSON
- */
-const responseWrapper = (res, status, code, message, contents) => {
-    return res.status(code).json(
-        {
-            status,
-            code,
-            message,
-            contents
-        }
-    )
-}
-
 module.exports = {
     isValidAddress,
     isValidCertificateHash,
@@ -100,7 +79,6 @@ module.exports = {
     toBuf,
     generateBcryptHash,
     compareBcryptHash,
-    responseWrapper,
     generateToken,
     generatePlatformCredentials,
 };
