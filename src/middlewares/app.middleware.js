@@ -2,16 +2,8 @@ require("dotenv").config();
 
 const models = require('../databases/models/index');
 const Platform = models.Platform;
-
 const { StatusCodes } = require('http-status-codes');
-const { responseWrapper } = require("../utils/helper");
-
-const sampleApplicationAccess = async (req, res, next) => {
-    const {accesscode} = req.headers;
-    if (!accesscode) return responseWrapper(res, false, StatusCodes.BAD_REQUEST, 'accesscode is required!', null);
-    if (accesscode !== process.env.ACCESS_CODE) return responseWrapper(res, false, StatusCodes.UNAUTHORIZED, 'invalid access code!', null);
-    next();
-}
+const response = require('../utils/response');
 
 const authMiddleware = async (req, res, next) => {
     try {
@@ -20,45 +12,45 @@ const authMiddleware = async (req, res, next) => {
 
         // Check presence
         if (!accessKey || !authToken) {
-            return responseWrapper(
+            return response.response.error(
                 res,
-                false,
-                StatusCodes.UNAUTHORIZED,
-                'Missing access key or auth token!'
+                'Missing access key or auth token!',
+                null,
+                StatusCodes.UNAUTHORIZED
             );
         }
 
         // Extract token from "Bearer <token>" format
         const [scheme, token] = authToken.split(' ');
         if (scheme !== 'Bearer' || !token) {
-            return responseWrapper(
+            return response.response.error(
                 res,
-                false,
-                StatusCodes.UNAUTHORIZED,
-                'Invalid authorization header format!'
+                'Invalid authorization header format!',
+                null,
+                StatusCodes.UNAUTHORIZED
             );
         }
 
         // Find platform by access key and token
         const keyRecord = await Platform.findOne({ where: { accessKey, token } });
         if (!keyRecord) {
-            return responseWrapper(
+            return response.response.error(
                 res,
-                false,
-                StatusCodes.FORBIDDEN,
-                'Invalid access key or auth token!'
+                'Invalid access key or auth token!',
+                null,
+                StatusCodes.FORBIDDEN
             );
         }
 
         next();
     } catch (err) {
-        return responseWrapper(
+        return response.response.error(
             res,
-            false,
-            StatusCodes.UNAUTHORIZED,
-            'Unauthorized access! Please provide valid credentials.'
+            'Unauthorized access! Please provide valid credentials.',
+            null,
+            StatusCodes.UNAUTHORIZED
         );
     }
 }
 
-module.exports = { sampleApplicationAccess, authMiddleware };
+module.exports = { authMiddleware };

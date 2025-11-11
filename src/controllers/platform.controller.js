@@ -1,7 +1,7 @@
 const PlatformService = require('../services/platform.service');
 const AuditrailService = require('../services/auditrail.service');
 const AUDIT_ACTION = require('../constants/auditAction.constant');
-const { responseWrapper } = require('../utils/helper');
+const response = require('../utils/response');
 const { StatusCodes } = require('http-status-codes');
 const { generatePlatformCredentials } = require('../utils/helper');
 const { Platform } = require('../databases/models');
@@ -16,19 +16,13 @@ const getPlatform = async (req, res) => {
         ipAddress: req.ip
     });
 
-    return responseWrapper(
-        res,
-        true,
-        StatusCodes.OK,
-        'get platform successfully!',
-        data
-    )
+    return response.response.success(res, 'Get platform successfully!', data)
 }
 
 const createPlatform = async (req, res) => {
   try {
     const { name, description } = req.body;
-    if (!name) return responseWrapper(res, false, 400, 'Platform name is required!');
+    if (!name) return response.response.error(res, 'Platform name is required!', null, StatusCodes.BAD_REQUEST);
 
     const { uuid, accessKey, token } = generatePlatformCredentials();
 
@@ -47,9 +41,9 @@ const createPlatform = async (req, res) => {
         ipAddress: req.ip
     });
 
-    return responseWrapper(res, true, 201, 'Platform created successfully!', newPlatform);
+    return response.response.success(res, 'Platform created successfully!', newPlatform, StatusCodes.CREATED);
   } catch (err) {
-    return responseWrapper(res, false, 500, err.message);
+    return response.response.error(res, err.message, null, StatusCodes.INTERNAL_SERVER_ERROR);
   }
 };
 

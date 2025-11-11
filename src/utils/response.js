@@ -48,4 +48,4 @@ const response = {
     responseWrapper(res, code, message, { docs, pagination }),
 };
 
-module.exports = { responseWrapper, response };
+module.exports = { response };

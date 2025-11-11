@@ -58,11 +58,10 @@ describe('GET /api/v1/platform', () => {
 
     assert.equal(res.status, 200);
     assert.equal(res.type, 'application/json');
-    assert.equal(res.body.status, true);
-    assert.equal(res.body.message, 'get platform successfully!');
+    assert.equal(res.body.message, 'Get platform successfully!');
     assert.equal(generateToken(previousUUID, previousAccessKey), validToken);
-    assert.ok(Array.isArray(res.body.contents));
-    assert.equal(res.body.contents.length, 1);
+    assert.ok(Array.isArray(res.body.data));
+    assert.equal(res.body.data.length, 1);
 
     const count = await Auditrail.count();
     assert.equal(count, 1);
@@ -74,7 +73,6 @@ describe('GET /api/v1/platform', () => {
       .set('Accept', 'application/json');
 
     assert.equal(res.status, 401);
-    assert.equal(res.body.status, false);
     assert.ok(res.body.message.includes('Missing'));
   });
 
@@ -88,7 +86,6 @@ describe('GET /api/v1/platform', () => {
       .set('authorization', 'Bearer ' + wrongToken);
     
     assert.equal(res.status, 403);
-    assert.equal(res.body.status, false);
     assert.ok(res.body.message.includes('or auth token!'));
   });
 
@@ -100,7 +97,6 @@ describe('GET /api/v1/platform', () => {
       .set('authorization', 'Bearer ' + validToken);
 
     assert.equal(res.status, 403);
-    assert.equal(res.body.status, false);
     assert.ok(res.body.message.includes('Invalid access key'));
   });
 });
