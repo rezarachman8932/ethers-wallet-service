@@ -7,6 +7,7 @@ const app = express();
 const { sequelize } = require('../src/databases/models');
 // routes
 const platformRoutes = require("../src/routes/platform.route");
+const walletRoutes = require("../src/routes/wallet.route");
 
 const port = process.env.NODE_PORT || 3020;
 
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.group("/api/v1/", (appRouter) => {
   appRouter.use('/platform', platformRoutes);
+  appRouter.use('/wallet', walletRoutes);
 });
 
 app.get('/', (req, res) => {

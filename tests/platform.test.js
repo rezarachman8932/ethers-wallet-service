@@ -1,7 +1,6 @@
 const request = require('supertest');
 const assert = require('assert');
 const app = require('../src/server');
-const { sequelize } = require('../src/databases/models');
 const { execSync } = require('child_process');
 const models = require('../src/databases/models');
 const Platform = models.Platform;
@@ -12,7 +11,7 @@ const { generateToken } = require('../src/utils/helper');
 
 describe('GET /api/v1/platform', () => {
 
-  let validAccessKey, validToken, validUuid;
+  let validAccessKey, validToken;
 
   before(async function() {
     this.timeout(10000);
@@ -39,14 +38,6 @@ describe('GET /api/v1/platform', () => {
 
     validAccessKey = platform.accessKey;
     validToken = platform.token;
-  });
-
-  afterEach(async function() {
-    await Auditrail.destroy({ where: {} });
-  });
-
-  after(async function() {
-    await sequelize.close();
   });
 
   it('should return platform list and create an audit trail', async function() {
@@ -99,4 +90,5 @@ describe('GET /api/v1/platform', () => {
     assert.equal(res.status, 403);
     assert.ok(res.body.message.includes('Invalid access key'));
   });
+
 });
