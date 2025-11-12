@@ -31,7 +31,7 @@ const createWallet = async (req, res) => {
     try {
         const { privateKey } = req.body;
         if (!privateKey) {
-            return response.response.error(res, "Missing private key in the request body!", error.message, StatusCodes.BAD_REQUEST);
+            return response.response.error(res, "Missing private key in the request body!", null, StatusCodes.BAD_REQUEST);
         }
 
         const wallet = new ethers.Wallet(privateKey);
@@ -57,7 +57,7 @@ const createWallet = async (req, res) => {
     try {
         const { mnemonic } = req.body;
         if (!mnemonic) {
-            return response.response.error(res, "Missing mnemonic in the request body!", error.message, StatusCodes.BAD_REQUEST);
+            return response.response.error(res, "Missing mnemonic in the request body!", null, StatusCodes.BAD_REQUEST);
         }
 
         const wallet = ethers.Wallet.fromPhrase(mnemonic);
