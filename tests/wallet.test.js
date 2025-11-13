@@ -84,5 +84,42 @@ describe('POST /api/v1/wallet', () => {
     assert.equal(res.status, 400);
     assert.ok(res.body.message.includes('Missing private key in the request body!'));
   });
+
+  it('should return wallet data from mnemonic successfully', async () => {
+    const mnemonic = 'test test test test test test test test test test test junk';
+
+    const res = await request(app)
+      .post('/api/v1/wallet/mnemonic')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', 'Bearer ' + validToken)
+      .send({ mnemonic });
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.message, 'Wallet retrieved successfully from mnemonic!');
+    assert.ok(res.body.data.address.startsWith('0x'));
+    assert.ok(res.body.data.privateKey.startsWith('0x'));
+    assert.equal(res.body.data.mnemonic, mnemonic);
+
+    const count = await Auditrail.count();
+    const fourthRecord = await Auditrail.findOne({
+      offset: 3,
+      order: [['id', 'ASC']]
+    });
+
+    assert.equal(count, 4);
+    assert.equal(fourthRecord.action, 'GET_WALLET_BY_MNEMONIC');
+  });
+
+  it('should return 400 if mnemonic missing', async function () {
+    const res = await request(app)
+      .post('/api/v1/wallet/mnemonic')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', 'Bearer ' + validToken)
+      .send({});
+
+    assert.equal(res.status, 400);
+    assert.ok(res.body.message.includes('Missing mnemonic in the request body!'));
+  });
   
 });
