@@ -1,4 +1,4 @@
-const { ethers } = require("ethers");
+const EthersService = require('../services/ethers.service');
 const response = require('../utils/response');
 const { StatusCodes } = require('http-status-codes');
 const AUDIT_ACTION = require('../constants/auditAction.constant');
@@ -6,7 +6,7 @@ const AuditrailService = require('../services/auditrail.service');
 
 const createWallet = async (req, res) => {
     try {
-        const wallet = ethers.Wallet.createRandom();
+        const walletData = EthersService.createWallet();
 
         await AuditrailService.create({
             action: AUDIT_ACTION.CREATE_WALLET, 
@@ -14,12 +14,6 @@ const createWallet = async (req, res) => {
             body: req.body, 
             ipAddress: req.ip
         });
-
-        const walletData = {
-            address: wallet.address,
-            privateKey: wallet.privateKey,
-            mnemonic: wallet.mnemonic?.phrase
-        };
 
         return response.response.success(res, 'New wallet created successfully!', walletData, StatusCodes.CREATED);
     } catch (error) {
@@ -34,11 +28,7 @@ const createWallet = async (req, res) => {
             return response.response.error(res, "Missing private key in the request body!", null, StatusCodes.BAD_REQUEST);
         }
 
-        const wallet = new ethers.Wallet(privateKey);
-        const walletData = {
-            address: wallet.address,
-            privateKey: wallet.privateKey
-        };
+        const walletData = EthersService.getWalletByPrivateKey(privateKey);
 
         await AuditrailService.create({
             action: AUDIT_ACTION.GET_WALLET_BY_PRIVATE_KEY, 
@@ -60,12 +50,7 @@ const createWallet = async (req, res) => {
             return response.response.error(res, "Missing mnemonic in the request body!", null, StatusCodes.BAD_REQUEST);
         }
 
-        const wallet = ethers.Wallet.fromPhrase(mnemonic);
-        const walletData = {
-            address: wallet.address,
-            privateKey: wallet.privateKey,
-            mnemonic: wallet.mnemonic?.phrase
-        };
+        const walletData = EthersService.getWalletByMnemonic(mnemonic);
 
         await AuditrailService.create({
             action: AUDIT_ACTION.GET_WALLET_BY_MNEMONIC, 
@@ -80,4 +65,61 @@ const createWallet = async (req, res) => {
     }
   }
 
-module.exports = { createWallet, getWalletByPrivateKey, getWalletByMnemonic }
+  const getWalletBalance = async (req, res) => {
+  try {
+    const { address, network } = req.body;
+    if (!address || !network) {
+        return response.response.error(
+            res,
+            "Missing address or network in the request body!",
+            null,
+            StatusCodes.BAD_REQUEST
+        );
+    }
+
+    // Choose RPC endpoint (you can later move these to env variables)
+    // let rpcUrl;
+    // if (network === 'ethereum') {
+    //   rpcUrl = 'https://eth.llamarpc.com'; // free public RPC
+    // } else if (network === 'polygon') {
+    //   rpcUrl = 'https://polygon.llamarpc.com'; // free public RPC
+    // } else {
+    //   return response.response.error(
+    //     res,
+    //     "Unsupported network. Please use 'ethereum' or 'polygon'.",
+    //     null,
+    //     StatusCodes.BAD_REQUEST
+    //   );
+    // }
+
+    // const provider = new ethers.JsonRpcProvider(rpcUrl);
+    // const balanceWei = await provider.getBalance(address);
+    // const balance = ethers.formatEther(balanceWei);
+
+    await AuditrailService.create({
+        action: AUDIT_ACTION.GET_ACCOUNT_BALANCE,
+        header: req.headers,
+        body: req.body,
+        ipAddress: req.ip,
+    });
+
+    return response.response.success(
+      res,
+      "Balance fetched successfully!",
+      {
+        network,
+        address,
+        balance
+      }
+    );
+  } catch (error) {
+    return response.response.error(
+      res,
+      "Unable to fetch wallet balance!",
+      error.message,
+      StatusCodes.UNPROCESSABLE_ENTITY
+    );
+  }
+};
+
+module.exports = { createWallet, getWalletByPrivateKey, getWalletByMnemonic, getWalletBalance }
