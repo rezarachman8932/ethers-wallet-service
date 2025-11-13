@@ -6,5 +6,6 @@ const { authMiddleware } = require('../middlewares/app.middleware');
 WalletRouter.post("/", authMiddleware, WalletController.createWallet);
 WalletRouter.post('/private', authMiddleware, WalletController.getWalletByPrivateKey);
 WalletRouter.post('/mnemonic', authMiddleware, WalletController.getWalletByMnemonic);
+WalletRouter.post('/balance', authMiddleware, WalletController.getWalletBalance);
 
 module.exports = WalletRouter;
