@@ -121,5 +121,32 @@ describe('POST /api/v1/wallet', () => {
     assert.equal(res.status, 400);
     assert.ok(res.body.message.includes('Missing mnemonic in the request body!'));
   });
-  
+
+  it('should fetch balance successfully for a valid address and network', async () => {
+    const address = '0x742d35Cc6634C0532925a3b844Bc454e4438f44e'; 
+    const network = 'ethereum';
+
+    const res = await request(app)
+      .post('/api/v1/wallet/balance')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', 'Bearer ' + validToken)
+      .send({ address, network });
+    
+    assert.equal(res.status, 200);
+    assert.equal(res.body.message, 'Balance fetched successfully!');
+  });
+
+  it('should fail when address or network is missing', async () => {
+    const res = await request(app)
+      .post('/api/v1/wallet/balance')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', 'Bearer ' + validToken)
+      .send({ address: '' }); 
+
+    assert.equal(res.status, 400);
+    assert.ok(res.body.message.includes('Missing address or network in the request body!'));
+  });
+
 });

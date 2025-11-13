@@ -19,9 +19,9 @@ const createWallet = async (req, res) => {
     } catch (error) {
         return response.response.error(res, "Failed to create wallet", error.message, StatusCodes.INTERNAL_SERVER_ERROR);
     }
-  }
+}
 
-  const getWalletByPrivateKey = async (req, res) => {
+const getWalletByPrivateKey = async (req, res) => {
     try {
         const { privateKey } = req.body;
         if (!privateKey) {
@@ -41,9 +41,9 @@ const createWallet = async (req, res) => {
     } catch (error) {
         return response.response.error(res, "Invalid private key or unable to retrieve wallet!", error.message, StatusCodes.UNPROCESSABLE_ENTITY);
     }
-  }
+}
 
-  const getWalletByMnemonic = async (req, res) => {
+const getWalletByMnemonic = async (req, res) => {
     try {
         const { mnemonic } = req.body;
         if (!mnemonic) {
@@ -63,42 +63,42 @@ const createWallet = async (req, res) => {
     } catch (error) {
         return response.response.error(res, "Invalid mnemonic or unable to retrieve wallet!", error.message, StatusCodes.UNPROCESSABLE_ENTITY);
     }
-  }
+}
 
-  const getWalletBalance = async (req, res) => {
-  try {
-    const { address, network } = req.body;
-    if (!address || !network) {
+const getWalletBalance = async (req, res) => {
+    try {
+        const { address, network } = req.body;
+        if (!address || !network) {
+            return response.response.error(
+                res,
+                "Missing address or network in the request body!",
+                null,
+                StatusCodes.BAD_REQUEST
+            );
+        }
+
+        await AuditrailService.create({
+            action: AUDIT_ACTION.GET_ACCOUNT_BALANCE,
+            header: req.headers,
+            body: req.body,
+            ipAddress: req.ip,
+        });
+
+        const balanceData = await EthersService.getBalance(address, network);
+
+        return response.response.success(
+            res,
+            "Balance fetched successfully!",
+            balanceData
+        );
+    } catch (error) {
         return response.response.error(
             res,
-            "Missing address or network in the request body!",
-            null,
-            StatusCodes.BAD_REQUEST
+            "Unable to fetch wallet balance!",
+            error.message,
+            StatusCodes.UNPROCESSABLE_ENTITY
         );
     }
-
-    await AuditrailService.create({
-        action: AUDIT_ACTION.GET_ACCOUNT_BALANCE,
-        header: req.headers,
-        body: req.body,
-        ipAddress: req.ip,
-    });
-
-    const balanceData = await EthersService.getBalance(address, network);
-
-    return response.response.success(
-        res,
-        "Balance fetched successfully!",
-        balanceData
-    );
-  } catch (error) {
-    return response.response.error(
-        res,
-        "Unable to fetch wallet balance!",
-        error.message,
-        StatusCodes.UNPROCESSABLE_ENTITY
-    );
-  }
-};
+}
 
 module.exports = { createWallet, getWalletByPrivateKey, getWalletByMnemonic, getWalletBalance }
