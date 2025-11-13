@@ -77,25 +77,6 @@ const createWallet = async (req, res) => {
         );
     }
 
-    // Choose RPC endpoint (you can later move these to env variables)
-    // let rpcUrl;
-    // if (network === 'ethereum') {
-    //   rpcUrl = 'https://eth.llamarpc.com'; // free public RPC
-    // } else if (network === 'polygon') {
-    //   rpcUrl = 'https://polygon.llamarpc.com'; // free public RPC
-    // } else {
-    //   return response.response.error(
-    //     res,
-    //     "Unsupported network. Please use 'ethereum' or 'polygon'.",
-    //     null,
-    //     StatusCodes.BAD_REQUEST
-    //   );
-    // }
-
-    // const provider = new ethers.JsonRpcProvider(rpcUrl);
-    // const balanceWei = await provider.getBalance(address);
-    // const balance = ethers.formatEther(balanceWei);
-
     await AuditrailService.create({
         action: AUDIT_ACTION.GET_ACCOUNT_BALANCE,
         header: req.headers,
@@ -103,21 +84,19 @@ const createWallet = async (req, res) => {
         ipAddress: req.ip,
     });
 
+    const balanceData = await EthersService.getBalance(address, network);
+
     return response.response.success(
-      res,
-      "Balance fetched successfully!",
-      {
-        network,
-        address,
-        balance
-      }
+        res,
+        "Balance fetched successfully!",
+        balanceData
     );
   } catch (error) {
     return response.response.error(
-      res,
-      "Unable to fetch wallet balance!",
-      error.message,
-      StatusCodes.UNPROCESSABLE_ENTITY
+        res,
+        "Unable to fetch wallet balance!",
+        error.message,
+        StatusCodes.UNPROCESSABLE_ENTITY
     );
   }
 };
