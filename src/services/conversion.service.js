@@ -1,12 +1,26 @@
+const Cache = require('../utils/cache');
+
 class ConversionService {
 
     constructor() {
         this.apiKey = process.env.CMC_API_KEY;
         this.baseUrl = process.env.CMC_URL;
+        
+        // Add caching storage
+        this.cache = new Cache(60); 
     }
 
     async getPrice(cryptoSymbol, fiatCurrency) {
         try {
+            const key = `${cryptoSymbol}_${fiatCurrency}`;
+
+            // 1. Check cache
+            const cached = this.cache.get(key);
+            if (cached !== null) {
+                return cached;
+            }
+
+            // 2. Fetch from CoinMarketCap
             const url = `${this.baseUrl}?symbol=${cryptoSymbol}&convert=${fiatCurrency}`;
             const resp = await fetch(url, {
                 headers: {
@@ -23,6 +37,9 @@ class ConversionService {
             if (!price) {
                 throw new Error("Invalid price response structure");
             }
+
+            // 3. Store in cache
+            this.cache.set(key, price);
 
             return price;
         } catch (error) {

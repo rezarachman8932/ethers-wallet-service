@@ -31,7 +31,7 @@ const convertFiatToCrypto = async (req, res) => {
 
         return response.response.success(
             res,
-            "Conversion success!",
+            "Conversion succeed!",
             data
         );
     } catch (error) {
