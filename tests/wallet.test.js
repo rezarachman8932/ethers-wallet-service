@@ -149,4 +149,51 @@ describe('POST /api/v1/wallet', () => {
     assert.ok(res.body.message.includes('Missing address or network in the request body!'));
   });
 
+  it('should convert from Fiat to ETH (from SGD)', async () => {
+    const fiatCurrency = 'SGD'; 
+    const cryptoSymbol = 'ETH';
+    const amount = 1000;
+
+    const res = await request(app)
+      .post('/api/v1/wallet/convert')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', 'Bearer ' + validToken)
+      .send({ fiatCurrency, cryptoSymbol, amount });
+    
+    assert.equal(res.status, 200);
+    assert.equal(res.body.message, 'Conversion succeed!');
+  });
+
+  it('should convert from Fiat to POL (from IDR)', async () => {
+    const fiatCurrency = 'IDR'; 
+    const cryptoSymbol = 'POL';
+    const amount = 1000;
+
+    const res = await request(app)
+      .post('/api/v1/wallet/convert')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', 'Bearer ' + validToken)
+      .send({ fiatCurrency, cryptoSymbol, amount });
+    
+    assert.equal(res.status, 200);
+    assert.equal(res.body.message, 'Conversion succeed!');
+  });
+
+  it('should fail when one of the body request is missing', async () => {
+    const fiatCurrency = 'IDR'; 
+    const cryptoSymbol = 'POL';
+
+    const res = await request(app)
+      .post('/api/v1/wallet/convert')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', 'Bearer ' + validToken)
+      .send({ fiatCurrency, cryptoSymbol });
+    
+    assert.equal(res.status, 400);
+    assert.ok(res.body.message.includes('Missing amount, fiatCurrency or cryptoSymbol!'));
+  });
+
 });
