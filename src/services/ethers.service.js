@@ -42,6 +42,15 @@ class EthersServices {
         };
     }
     
+    async getTransactionDetail(txHash, network) {
+        const rpcUrl = networkHelper.getRpcUrl(network);
+        const provider = new ethers.JsonRpcProvider(rpcUrl);
+        const tx = await provider.getTransaction(txHash);
+        const receipt = await provider.getTransactionReceipt(txHash);
+        if (!tx) throw new Error("Transaction not found");
+        return { tx, receipt };
+    }
+
 }
 
 module.exports = new EthersServices();

@@ -1,11 +1,19 @@
-const { StatusCodes } = require('http-status-codes');
-
 class NetworkHelper {
 
     constructor() {
         this.networks = {
             ethereum: 'https://eth.llamarpc.com',
             polygon: 'https://polygon.llamarpc.com',
+        };
+
+        this.networkTransactionHistoryUrls = {
+            ethereum: 'https://api.etherscan.io/api',
+            polygon: 'https://api.polygonscan.com/api',
+        };
+
+        this.networkTransactionApiKeys = {
+            ethereum: process.env.ETHERSCAN_API_KEY,
+            polygon: process.env.POLYGONSCAN_API_KEY,
         };
     }
 
@@ -26,6 +34,32 @@ class NetworkHelper {
         }
         
         return rpcUrl;
+    }
+
+    getTransactionHistoryUrl(network) {
+        if (!network) {
+            throw new Error("Network parameter is required!");
+        }
+
+        const url = this.networkTransactionHistoryUrls[network.toLowerCase()];
+        if (!url) {
+            throw new Error("Base URL doesn't exists. Please use 'ethereum' or 'polygon' network.");
+        }
+        
+        return url;
+    }
+
+    getTransactionApiKey(network) {
+        if (!network) {
+            throw new Error("Network parameter is required!");
+        }
+
+        const apiKey = this.networkTransactionApiKeys[network.toLowerCase()];
+        if (!apiKey) {
+            throw new Error("API key doesn't exists. Please use 'ethereum' or 'polygon' network.");
+        }
+        
+        return apiKey;
     }
 
 }
