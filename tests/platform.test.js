@@ -1,3 +1,4 @@
+require('dotenv').config();
 const request = require('supertest');
 const assert = require('assert');
 const app = require('../src/server');
@@ -14,11 +15,12 @@ describe('GET /api/v1/platform', () => {
 
   before(async function () {
     this.timeout(10000);
-
-    // Reset DB
-    execSync('npx sequelize-cli db:drop', { stdio: 'inherit' });
-    execSync('npx sequelize-cli db:create', { stdio: 'inherit' });
-    execSync('npx sequelize-cli db:migrate', { stdio: 'inherit' });
+    if (process.env.NODE_ENV === 'development') {
+      // Reset DB
+      execSync('npx sequelize-cli db:drop', { stdio: 'inherit' });
+      execSync('npx sequelize-cli db:create', { stdio: 'inherit' });
+      execSync('npx sequelize-cli db:migrate', { stdio: 'inherit' });
+    }
 
     // Generate platform credentials
     const { uuid, accessKey, token } = generatePlatformCredentials();

@@ -17,11 +17,12 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "bash scripts/check-email.sh",
+      "npm run lint",
       "npm run lint:fix",
-      "prettier --write"
+      "npm run format"
     ],
     "*.{json,css,md}": [
-      "prettier --write"
+      "npm run format"
     ]
   },
   "keywords": [
