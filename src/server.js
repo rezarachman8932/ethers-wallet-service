@@ -9,8 +9,6 @@ const { sequelize } = require('../src/databases/models');
 const platformRoutes = require("../src/routes/platform.route");
 const walletRoutes = require("../src/routes/wallet.route");
 
-const port = process.env.NODE_PORT || 3020;
-
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(cors());
 app.options('*', cors());
@@ -29,6 +27,7 @@ app.get('/', (req, res) => {
 app.get("/check-health", async (req, res) => {
     try {
         await sequelize.authenticate();
+        // eslint-disable-next-line no-console
         console.log('Connection has been established successfully.');
         return res.status(200).json({
             message: "Check Health successfully!"

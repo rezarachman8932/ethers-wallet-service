@@ -3,7 +3,7 @@ const assert = require('assert')
 const app = require('../src/server');
 
 describe('GET /', () => {
-  it('responds responds to the world', async function() {
+  it('responds responds to the world', async () => {
     const res = await request(app)
       .get('/')
       .set('Accept', 'application/json');
@@ -15,7 +15,7 @@ describe('GET /', () => {
 });
 
 describe('GET /404', () => {
-  it('responds with a 404', async function() {
+  it('responds with a 404', async () => {
     const res = await request(app)
       .get('/404')
       .set('Accept', 'application/json');

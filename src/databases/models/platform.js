@@ -4,6 +4,7 @@ const { Model } = require('sequelize')
 
 module.exports = (sequelize, DataTypes) => {
   class Platform extends Model {
+    // eslint-disable-next-line no-unused-vars
     static associate(models) {
       
     }

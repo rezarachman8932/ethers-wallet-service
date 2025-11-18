@@ -8,6 +8,7 @@ const isValidAddress = address => {
     try {
         return isAddress(toChecksumAddress(address));
     } catch (e) {
+        console.error('Invalid address:', e);
         return false;
     }
 };
@@ -34,9 +35,7 @@ const makeid = (length) => {
     return buf.toString("hex");
 }
 
-const bufSortJoin = (...args) => {
-    return Buffer.concat([...args].sort(Buffer.compare));
-}
+const bufSortJoin = (...args) => Buffer.concat([...args].sort(Buffer.compare))
 
 const toBuf = (str) => {
     if (str instanceof Buffer) return str;
@@ -44,12 +43,12 @@ const toBuf = (str) => {
 }
 
 const generateBcryptHash = (words) => {
-    let hash = hashSync(words, genSaltSync(8), null);
+    const hash = hashSync(words, genSaltSync(8), null);
     return hash;
 }
 
 const compareBcryptHash = (hashBcrypt, words) => {
-    let result = compareSync(words, hashBcrypt);
+    const result = compareSync(words, hashBcrypt);
     return result;
 }
 

@@ -3,7 +3,7 @@ const Platform = models.Platform;
 
 class PlatformServices {
     async getAll() {
-        let data = await Platform.findAll();
+        const data = await Platform.findAll();
         return data;
     }
 }

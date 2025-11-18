@@ -40,12 +40,12 @@ describe('GET /api/v1/platform', () => {
     validToken = platform.token;
   });
 
-  it('should return platform list and create an audit trail', async function() {
+  it('should return platform list and create an audit trail', async () => {
     const res = await request(app)
       .get('/api/v1/platform')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', 'Bearer ' + validToken);
+      .set('authorization', `Bearer ${  validToken}`);
 
     assert.equal(res.status, 200);
     assert.equal(res.type, 'application/json');
@@ -58,7 +58,7 @@ describe('GET /api/v1/platform', () => {
     assert.equal(count, 1);
   });
 
-  it('should fail with 401 when missing headers', async function () {
+  it('should fail with 401 when missing headers', async () => {
     const res = await request(app)
       .get('/api/v1/platform')
       .set('Accept', 'application/json');
@@ -67,25 +67,25 @@ describe('GET /api/v1/platform', () => {
     assert.ok(res.body.message.includes('Missing'));
   });
 
-  it('should fail with 403 when invalid token for valid access key', async function () {
+  it('should fail with 403 when invalid token for valid access key', async () => {
     const wrongToken = crypto.createHash('sha256').update('fake:combo').digest('hex');
 
     const res = await request(app)
       .get('/api/v1/platform')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', 'Bearer ' + wrongToken);
+      .set('authorization', `Bearer ${  wrongToken}`);
     
     assert.equal(res.status, 403);
     assert.ok(res.body.message.includes('or auth token!'));
   });
 
-  it('should fail with 403 when access key not found', async function () {
+  it('should fail with 403 when access key not found', async () => {
     const res = await request(app)
       .get('/api/v1/platform')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', 'non-existent-access-key')
-      .set('authorization', 'Bearer ' + validToken);
+      .set('authorization', `Bearer ${  validToken}`);
 
     assert.equal(res.status, 403);
     assert.ok(res.body.message.includes('Invalid access key'));

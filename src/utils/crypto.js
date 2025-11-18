@@ -4,29 +4,29 @@ const CryptoJs = require("crypto-js");
 /**
  * Encrypted
  * @param {Text} value plain text
- * @param {Text} secret_key encrypted key
+ * @param {Text} secretKey encrypted key
  * @returns 
  */
-const Encrypted = (value, secret_key) => {
-    if (!secret_key) {
-        secret_key = process.env.SECRET_KEY
+const Encrypted = (value, secretKey) => {
+    if (!secretKey) {
+        secretKey = process.env.SECRET_KEY
     }
-    let chipertext = CryptoJs.AES.encrypt(value.toString(), secret_key).toString()
+    const chipertext = CryptoJs.AES.encrypt(value.toString(), secretKey).toString()
     return chipertext
 }
 
 /**
  * Decrypted
  * @param {Text} value plain text
- * @param {Text} secret_key encrypted key
+ * @param {Text} secretKey encrypted key
  * @returns 
  */
-const Decrypted = (value, secret_key) => {
-    if (!secret_key) {
-        secret_key = process.env.SECRET_KEY
+const Decrypted = (value, secretKey) => {
+    if (!secretKey) {
+        secretKey = process.env.SECRET_KEY
     }
-    let bytes = CryptoJs.AES.decrypt(value.toString(), secret_key);
-    let originalText = bytes.toString(CryptoJs.enc.Utf8);
+    const bytes = CryptoJs.AES.decrypt(value.toString(), secretKey);
+    const originalText = bytes.toString(CryptoJs.enc.Utf8);
     return originalText
 }
 

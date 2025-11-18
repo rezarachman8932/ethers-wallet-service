@@ -7,13 +7,11 @@
  * @param {*} data - Optional response data
  * @returns {Object} JSON
  */
-const responseWrapper = (res, code, message, data = null) => {
-  return res.status(code).json({
+const responseWrapper = (res, code, message, data = null) => res.status(code).json({
     response: code,
     message,
     data,
   });
-};
 
 const response = {
   /**

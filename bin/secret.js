@@ -1,9 +1,11 @@
+ 
 const { SecretManagerServiceClient } = require("@google-cloud/secret-manager");
 const { GoogleAuth } = require("google-auth-library");
 require("dotenv").config();
 
 const getGoogleSecret = async () => {
   if (process.env.GCLOUDENV) {
+    // eslint-disable-next-line no-console
     console.log("attempting to load secrets");
 
     try {
@@ -12,6 +14,7 @@ const getGoogleSecret = async () => {
       const envVars = JSON.parse(process.env.GCLOUDENV);
       Object.assign(process.env, envVars);
     } catch (exception) {
+      console.warn(exception);
       try {
         // Authentication required for local device connection
         const auth = new GoogleAuth({
@@ -26,9 +29,10 @@ const getGoogleSecret = async () => {
         const secretPayload = version.payload.data.toString("utf8");
         const envVars = JSON.parse(secretPayload);
         Object.assign(process.env, envVars);
+        // eslint-disable-next-line no-console
         console.log("loaded secrets");
       } catch (exception) {
-        console.log(exception);
+        console.warn(exception);
         console.error("Failed to retrieve google secrets");
         process.exit(1);
       }

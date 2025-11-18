@@ -21,7 +21,7 @@ describe('POST /api/v1/wallet', () => {
     validToken = platform.token;
   });
   
-  after(async function() {
+  after(async () => {
     await sequelize.close();
   });
 
@@ -30,7 +30,7 @@ describe('POST /api/v1/wallet', () => {
       .post('/api/v1/wallet')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', 'Bearer ' + validToken);
+      .set('authorization', `Bearer ${  validToken}`);
 
     assert.equal(res.status, 201);
     assert.equal(res.body.message, 'New wallet created successfully!');
@@ -55,7 +55,7 @@ describe('POST /api/v1/wallet', () => {
       .post('/api/v1/wallet/private')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', 'Bearer ' + validToken)
+      .set('authorization', `Bearer ${  validToken}`)
       .send({ privateKey });
 
     assert.equal(res.status, 200);
@@ -74,11 +74,11 @@ describe('POST /api/v1/wallet', () => {
     assert.equal(thirdRecord.action, 'GET_WALLET_BY_PRIVATE_KEY');
   });
 
-  it('should return 400 if private key missing', async function () {
+  it('should return 400 if private key missing', async () => {
     const res = await request(app)
       .post('/api/v1/wallet/private')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', 'Bearer ' + validToken)
+      .set('authorization', `Bearer ${  validToken}`)
       .send({});
 
     assert.equal(res.status, 400);
@@ -92,7 +92,7 @@ describe('POST /api/v1/wallet', () => {
       .post('/api/v1/wallet/mnemonic')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', 'Bearer ' + validToken)
+      .set('authorization', `Bearer ${  validToken}`)
       .send({ mnemonic });
 
     assert.equal(res.status, 200);
@@ -111,11 +111,11 @@ describe('POST /api/v1/wallet', () => {
     assert.equal(fourthRecord.action, 'GET_WALLET_BY_MNEMONIC');
   });
 
-  it('should return 400 if mnemonic missing', async function () {
+  it('should return 400 if mnemonic missing', async () => {
     const res = await request(app)
       .post('/api/v1/wallet/mnemonic')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', 'Bearer ' + validToken)
+      .set('authorization', `Bearer ${  validToken}`)
       .send({});
 
     assert.equal(res.status, 400);
@@ -130,7 +130,7 @@ describe('POST /api/v1/wallet', () => {
       .post('/api/v1/wallet/balance')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', 'Bearer ' + validToken)
+      .set('authorization', `Bearer ${  validToken}`)
       .send({ address, network });
     
     assert.equal(res.status, 200);
@@ -142,7 +142,7 @@ describe('POST /api/v1/wallet', () => {
       .post('/api/v1/wallet/balance')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', 'Bearer ' + validToken)
+      .set('authorization', `Bearer ${  validToken}`)
       .send({ address: '' }); 
 
     assert.equal(res.status, 400);
@@ -158,7 +158,7 @@ describe('POST /api/v1/wallet', () => {
       .post('/api/v1/wallet/convert')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', 'Bearer ' + validToken)
+      .set('authorization', `Bearer ${  validToken}`)
       .send({ fiatCurrency, cryptoSymbol, amount });
     
     assert.equal(res.status, 200);
@@ -174,7 +174,7 @@ describe('POST /api/v1/wallet', () => {
       .post('/api/v1/wallet/convert')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', 'Bearer ' + validToken)
+      .set('authorization', `Bearer ${  validToken}`)
       .send({ fiatCurrency, cryptoSymbol, amount });
     
     assert.equal(res.status, 200);
@@ -189,7 +189,7 @@ describe('POST /api/v1/wallet', () => {
       .post('/api/v1/wallet/convert')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', 'Bearer ' + validToken)
+      .set('authorization', `Bearer ${  validToken}`)
       .send({ fiatCurrency, cryptoSymbol });
     
     assert.equal(res.status, 400);

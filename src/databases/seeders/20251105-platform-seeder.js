@@ -4,9 +4,8 @@ const { v4: uuidv4 } = require('uuid');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
+  // eslint-disable-next-line no-unused-vars
   async up(queryInterface, Sequelize) {
-    const now = new Date();
-
     await queryInterface.bulkInsert('Platforms', [
       {
         uuid: uuidv4(),
@@ -27,6 +26,7 @@ module.exports = {
     ]);
   },
 
+  // eslint-disable-next-line no-unused-vars
   async down(queryInterface, Sequelize) {
     await queryInterface.bulkDelete('Platforms', null, {});
   }
