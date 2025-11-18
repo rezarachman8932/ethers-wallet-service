@@ -1,12 +1,11 @@
- 
-const { SecretManagerServiceClient } = require("@google-cloud/secret-manager");
-const { GoogleAuth } = require("google-auth-library");
-require("dotenv").config();
+const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
+const { GoogleAuth } = require('google-auth-library');
+require('dotenv').config();
 
 const getGoogleSecret = async () => {
   if (process.env.GCLOUDENV) {
     // eslint-disable-next-line no-console
-    console.log("attempting to load secrets");
+    console.log('attempting to load secrets');
 
     try {
       // Google Cloud Run processes the secrets authentication and stores it in the variable of choice.
@@ -18,7 +17,7 @@ const getGoogleSecret = async () => {
       try {
         // Authentication required for local device connection
         const auth = new GoogleAuth({
-          scopes: ["https://www.googleapis.com/auth/cloud-platform"],
+          scopes: ['https://www.googleapis.com/auth/cloud-platform'],
         });
         const client = new SecretManagerServiceClient({ auth });
 
@@ -26,14 +25,14 @@ const getGoogleSecret = async () => {
           name: process.env.GCLOUDENV,
         });
 
-        const secretPayload = version.payload.data.toString("utf8");
+        const secretPayload = version.payload.data.toString('utf8');
         const envVars = JSON.parse(secretPayload);
         Object.assign(process.env, envVars);
         // eslint-disable-next-line no-console
-        console.log("loaded secrets");
+        console.log('loaded secrets');
       } catch (exception) {
         console.warn(exception);
-        console.error("Failed to retrieve google secrets");
+        console.error('Failed to retrieve google secrets');
         process.exit(1);
       }
     }

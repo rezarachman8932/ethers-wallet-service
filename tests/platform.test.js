@@ -5,15 +5,14 @@ const { execSync } = require('child_process');
 const models = require('../src/databases/models');
 const Platform = models.Platform;
 const Auditrail = models.Auditrail;
-const crypto = require("crypto");
-const { generatePlatformCredentials } = require('../src/utils/helper'); 
+const crypto = require('crypto');
+const { generatePlatformCredentials } = require('../src/utils/helper');
 const { generateToken } = require('../src/utils/helper');
 
 describe('GET /api/v1/platform', () => {
-
   let validAccessKey, validToken;
 
-  before(async function() {
+  before(async function () {
     this.timeout(10000);
 
     // Reset DB
@@ -45,7 +44,7 @@ describe('GET /api/v1/platform', () => {
       .get('/api/v1/platform')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${  validToken}`);
+      .set('authorization', `Bearer ${validToken}`);
 
     assert.equal(res.status, 200);
     assert.equal(res.type, 'application/json');
@@ -59,9 +58,7 @@ describe('GET /api/v1/platform', () => {
   });
 
   it('should fail with 401 when missing headers', async () => {
-    const res = await request(app)
-      .get('/api/v1/platform')
-      .set('Accept', 'application/json');
+    const res = await request(app).get('/api/v1/platform').set('Accept', 'application/json');
 
     assert.equal(res.status, 401);
     assert.ok(res.body.message.includes('Missing'));
@@ -74,8 +71,8 @@ describe('GET /api/v1/platform', () => {
       .get('/api/v1/platform')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${  wrongToken}`);
-    
+      .set('authorization', `Bearer ${wrongToken}`);
+
     assert.equal(res.status, 403);
     assert.ok(res.body.message.includes('or auth token!'));
   });
@@ -85,10 +82,9 @@ describe('GET /api/v1/platform', () => {
       .get('/api/v1/platform')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', 'non-existent-access-key')
-      .set('authorization', `Bearer ${  validToken}`);
+      .set('authorization', `Bearer ${validToken}`);
 
     assert.equal(res.status, 403);
     assert.ok(res.body.message.includes('Invalid access key'));
   });
-
 });

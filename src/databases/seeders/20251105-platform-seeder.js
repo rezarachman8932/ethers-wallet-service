@@ -13,7 +13,7 @@ module.exports = {
         name: 'KC Wallet Service',
         description: 'Primary platform for wallet service operations',
         token: '78943722374234-token-example',
-        accessKey: '2783612736123-access-key-example'
+        accessKey: '2783612736123-access-key-example',
       },
       {
         uuid: uuidv4(),
@@ -21,13 +21,13 @@ module.exports = {
         name: 'KC Wallet Service 2',
         description: 'Primary platform for wallet service operations 2',
         token: '78943722374212-token-example',
-        accessKey: '2783612733523-access-key-example'
-      }
+        accessKey: '2783612733523-access-key-example',
+      },
     ]);
   },
 
   // eslint-disable-next-line no-unused-vars
   async down(queryInterface, Sequelize) {
     await queryInterface.bulkDelete('Platforms', null, {});
-  }
+  },
 };

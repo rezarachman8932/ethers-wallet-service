@@ -17,7 +17,8 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "bash scripts/check-email.sh",
-      "eslint --fix"
+      "npm run lint:fix",
+      "prettier --write"
     ],
     "*.{json,css,md}": [
       "prettier --write"
@@ -60,6 +61,7 @@
     "ethereumjs-util": "^7.1.5",
     "ethers": "^6.15.0",
     "express": "^4.18.2",
+    "express-group-routes": "^1.1.0",
     "google-auth-library": "^10.5.0",
     "http-status-codes": "^2.3.0",
     "joi": "^18.0.1",
