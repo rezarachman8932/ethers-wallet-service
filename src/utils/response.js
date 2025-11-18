@@ -7,13 +7,12 @@
  * @param {*} data - Optional response data
  * @returns {Object} JSON
  */
-const responseWrapper = (res, code, message, data = null) => {
-  return res.status(code).json({
+const responseWrapper = (res, code, message, data = null) =>
+  res.status(code).json({
     response: code,
     message,
     data,
   });
-};
 
 const response = {
   /**
@@ -44,8 +43,13 @@ const response = {
    * @param {Object} pagination - Pagination details
    * @param {number} code - HTTP status (default: 200)
    */
-  paginated: (res, message = 'Data retrieved successfully', docs = [], pagination = {}, code = 200) =>
-    responseWrapper(res, code, message, { docs, pagination }),
+  paginated: (
+    res,
+    message = 'Data retrieved successfully',
+    docs = [],
+    pagination = {},
+    code = 200
+  ) => responseWrapper(res, code, message, { docs, pagination }),
 };
 
 module.exports = { response };

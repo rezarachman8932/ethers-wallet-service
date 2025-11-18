@@ -7,22 +7,28 @@ const { generatePlatformCredentials } = require('../utils/helper');
 const { Platform } = require('../databases/models');
 
 const getPlatform = async (req, res) => {
-    const data = await PlatformService.getAll();
+  const data = await PlatformService.getAll();
 
-    await AuditrailService.create({
-        action: AUDIT_ACTION.GET_PLATFORM,
-        header: req.headers,
-        body: req.body,
-        ipAddress: req.ip
-    });
+  await AuditrailService.create({
+    action: AUDIT_ACTION.GET_PLATFORM,
+    header: req.headers,
+    body: req.body,
+    ipAddress: req.ip,
+  });
 
-    return response.response.success(res, 'Get platform successfully!', data)
-}
+  return response.response.success(res, 'Get platform successfully!', data);
+};
 
 const createPlatform = async (req, res) => {
   try {
     const { name, description } = req.body;
-    if (!name) return response.response.error(res, 'Platform name is required!', null, StatusCodes.BAD_REQUEST);
+    if (!name)
+      return response.response.error(
+        res,
+        'Platform name is required!',
+        null,
+        StatusCodes.BAD_REQUEST
+      );
 
     const { uuid, accessKey, token } = generatePlatformCredentials();
 
@@ -31,23 +37,28 @@ const createPlatform = async (req, res) => {
       name,
       description,
       accessKey,
-      token
+      token,
     });
 
     await AuditrailService.create({
-        action: AUDIT_ACTION.CREATE_PLATFORM,
-        header: req.headers,
-        body: req.body,
-        ipAddress: req.ip
+      action: AUDIT_ACTION.CREATE_PLATFORM,
+      header: req.headers,
+      body: req.body,
+      ipAddress: req.ip,
     });
 
-    return response.response.success(res, 'Platform created successfully!', newPlatform, StatusCodes.CREATED);
+    return response.response.success(
+      res,
+      'Platform created successfully!',
+      newPlatform,
+      StatusCodes.CREATED
+    );
   } catch (err) {
     return response.response.error(res, err.message, null, StatusCodes.INTERNAL_SERVER_ERROR);
   }
 };
 
 module.exports = {
-    getPlatform,
-    createPlatform
-}
+  getPlatform,
+  createPlatform,
+};
