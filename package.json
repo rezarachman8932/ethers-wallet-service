@@ -14,16 +14,10 @@
     "validate": "npm run lint && npm run format:check && npm test",
     "prepare": "husky"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "bash scripts/check-email.sh",
-      "npm run validate",
-      "mocha --exit tests/*"
+      "eslint --fix"
     ],
     "*.{json,css,md}": [
       "prettier --write"

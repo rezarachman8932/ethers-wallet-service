@@ -45,6 +45,7 @@ const authMiddleware = async (req, res, next) => {
         next();
     } catch (err) {
         console.error('Error in authMiddleware:', err);
+        console.log(err.message);
         return response.response.error(
             res,
             'Unauthorized access! Please provide valid credentials.',

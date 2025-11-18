@@ -1,7 +1,5 @@
 ## Installation
 
-###
-
 Install kc-wallet-svc with npm
 
 ```bash
