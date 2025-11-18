@@ -11,7 +11,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
-    "validate": "npm run lint && npm run format:check && npm test"
+    "validate": "npm run lint && npm run format:check && npm test",
+    "prepare": "husky"
   },
   "husky": {
     "hooks": {
@@ -21,8 +22,7 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "bash scripts/check-email.sh",
-      "eslint --fix",
-      "prettier --write",
+      "npm run validate",
       "mocha --exit tests/*"
     ],
     "*.{json,css,md}": [
