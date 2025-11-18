@@ -1,11 +1,13 @@
-const { StatusCodes } = require('http-status-codes');
-
 class NetworkHelper {
 
     constructor() {
+        // todo : need to check and find the API key
         this.networks = {
-            ethereum: 'https://eth.llamarpc.com',
-            polygon: 'https://polygon.llamarpc.com',
+            ethereum: 'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY, 
+            polygon: 'https://polygon-mainnet.infura.io/v3/' + process.env.INFURA_API_KEY,
+            sepolia: 'https://sepolia.infura.io/v3/' + process.env.INFURA_API_KEY,
+            amoy: 'https://polygon-amoy.infura.io/v3/' + process.env.INFURA_API_KEY,
+            mainnet: 'https://mainnet.infura.io/v3/' + process.env.INFURA_API_KEY,
         };
     }
 
