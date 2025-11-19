@@ -114,7 +114,7 @@ const getTransactionHistory = async (req, res) => {
             );
         }
 
-        const data = await HistoryService.getHistoryByAddress(address, network);
+        const data = await HistoryService.getTransactionsByAddress(address, network);
 
         await AuditrailService.create({
             action: AUDIT_ACTION.GET_TRANSACTION_HISTORY,
@@ -150,7 +150,7 @@ const getTransactionDetail = async (req, res) => {
             );
         }
 
-        const data = await EthersService.getTransactionDetail(txHash, network);
+        const data = await EthersService.getTransactionDetailByHash(txHash, network);
 
         await AuditrailService.create({
             action: AUDIT_ACTION.GET_TRANSACTION_HISTORY_DETAIL,

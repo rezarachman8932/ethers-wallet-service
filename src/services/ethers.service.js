@@ -42,13 +42,23 @@ class EthersServices {
         };
     }
     
-    async getTransactionDetail(txHash, network) {
-        const rpcUrl = networkHelper.getRpcUrl(network);
-        const provider = new ethers.JsonRpcProvider(rpcUrl);
-        const tx = await provider.getTransaction(txHash);
-        const receipt = await provider.getTransactionReceipt(txHash);
-        if (!tx) throw new Error("Transaction not found");
-        return { tx, receipt };
+    async getTransactionDetailByHash(txHash, network) {
+        const { apiUrl, apiKey, chainId } = networkHelper.getExplorerConfig(network);
+        const url =
+            `${apiUrl}?chainid=${chainId}` +
+            `&module=proxy` +
+            `&action=eth_getTransactionByHash` +
+            `&txhash=${txHash}` +
+            `&apikey=${apiKey}`;
+
+        const response = await fetch(url);
+        const json = await response.json();
+
+        if (!json.result) {
+            throw new Error(json.message || "Failed to fetch transaction detail");
+        }
+
+        return json.result;
     }
 
 }

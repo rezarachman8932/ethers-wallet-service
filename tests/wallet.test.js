@@ -149,4 +149,42 @@ describe('POST /api/v1/wallet', () => {
     assert.ok(res.body.message.includes('Missing address or network in the request body!'));
   });
 
+  it('should fetch transaction history successfully', async () => {
+    const body = {
+      address: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+      network: "ethereum"
+    };
+
+    const res = await request(app)
+      .post('/api/v1/transaction/history')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', 'Bearer ' + validToken)
+      .send(body);
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.message, 'Transaction history fetched successfully!');
+    assert.isArray(res.body.data);
+
+    const count = await Auditrail.count();
+    const lastRecord = await Auditrail.findOne({
+      offset: count - 1,
+      order: [['id', 'ASC']]
+    });
+
+    assert.equal(lastRecord.action, 'GET_TRANSACTION_HISTORY');
+  });
+
+  it('should return 400 if address or network is missing for history', async () => {
+    const res = await request(app)
+      .post('/api/v1/transaction/history')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', 'Bearer ' + validToken)
+      .send({ address: '' }); 
+
+    assert.equal(res.status, 400);
+    assert.ok(res.body.message.includes('Missing address or network in the request body!'));
+  });
+
 });

@@ -5,16 +5,6 @@ class NetworkHelper {
             ethereum: 'https://eth.llamarpc.com',
             polygon: 'https://polygon.llamarpc.com',
         };
-
-        this.networkTransactionHistoryUrls = {
-            ethereum: 'https://api.etherscan.io/api',
-            polygon: 'https://api.polygonscan.com/api',
-        };
-
-        this.networkTransactionApiKeys = {
-            ethereum: process.env.ETHERSCAN_API_KEY,
-            polygon: process.env.POLYGONSCAN_API_KEY,
-        };
     }
 
     /**
@@ -36,30 +26,26 @@ class NetworkHelper {
         return rpcUrl;
     }
 
-    getTransactionHistoryUrl(network) {
-        if (!network) {
-            throw new Error("Network parameter is required!");
-        }
+    getExplorerConfig(network) {
+        const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
+        const POLYGONSCAN_API_KEY = process.env.POLYGONSCAN_API_KEY;
 
-        const url = this.networkTransactionHistoryUrls[network.toLowerCase()];
-        if (!url) {
-            throw new Error("Base URL doesn't exists. Please use 'ethereum' or 'polygon' network.");
+        switch (network) {
+            case "ethereum":
+                return {
+                    apiUrl: "https://api.etherscan.io/v2/api",
+                    apiKey: ETHERSCAN_API_KEY,
+                    chainId: 1
+                };
+            case "polygon":
+                return {
+                    apiUrl: "https://api.polygonscan.com/v2/api",
+                    apiKey: POLYGONSCAN_API_KEY,
+                    chainId: 137
+                };
+            default:
+                throw new Error("Unsupported network");
         }
-        
-        return url;
-    }
-
-    getTransactionApiKey(network) {
-        if (!network) {
-            throw new Error("Network parameter is required!");
-        }
-
-        const apiKey = this.networkTransactionApiKeys[network.toLowerCase()];
-        if (!apiKey) {
-            throw new Error("API key doesn't exists. Please use 'ethereum' or 'polygon' network.");
-        }
-        
-        return apiKey;
     }
 
 }

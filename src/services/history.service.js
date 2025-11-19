@@ -2,17 +2,23 @@ const networkHelper = require("../utils/networkHelper");
 
 class HistoryService {
 
-    async getHistoryByAddress(address, network) {
-        const baseUrl = networkHelper.getTransactionHistoryUrl(network);
-        const apiKey  = networkHelper.getTransactionApiKey(network);
+    async getTransactionsByAddress(address, network) {
+        const { apiUrl, apiKey, chainId } = networkHelper.getExplorerConfig(network);
+        const url =
+            `${apiUrl}?chainid=${chainId}` +
+            `&module=account` +
+            `&action=txlist` +
+            `&address=${address}` +
+            `&startblock=0` +
+            `&endblock=99999999` +
+            `&sort=desc` +
+            `&apikey=${apiKey}`;
 
-        const url = `${baseUrl}?module=account&action=txlist&address=${address}&sort=desc&apikey=${apiKey}`;
+        const response = await fetch(url);
+        const json = await response.json();
 
-        const resp = await fetch(url);
-        const json = await resp.json();
-
-        if (json.status !== "1") {
-            throw new Error(json.message || "Failed to fetch history");
+        if (!json.result) {
+            throw new Error(json.message || "Failed to fetch transaction history");
         }
 
         return json.result;
