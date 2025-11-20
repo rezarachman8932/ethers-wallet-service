@@ -149,22 +149,24 @@ describe('POST /api/v1/wallet', () => {
     assert.ok(res.body.message.includes('Missing address or network in the request body!'));
   });
 
-  it('should fetch transaction history successfully', async () => {
-    const body = {
-      address: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-      network: "ethereum"
-    };
+  it('should fetch transaction detail successfully for a valid txHash and network', async function () {
+    this.timeout(5000);
+
+    const txHash = '0x3384291afad5486985d0d79be408b0dc1bfa6b703ae728135ff57038c524dd1d';
+    const network = 'polygon';
 
     const res = await request(app)
-      .post('/api/v1/transaction/history')
+      .post('/api/v1/wallet/transaction/detail')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', 'Bearer ' + validToken)
-      .send(body);
+      .set('Authorization', 'Bearer ' + validToken)
+      .send({ txHash, network });
 
     assert.equal(res.status, 200);
-    assert.equal(res.body.message, 'Transaction history fetched successfully!');
-    assert.isArray(res.body.data);
+    assert.equal(res.body.message, 'Transaction detail fetched successfully!');
+
+    assert.ok(typeof res.body.data === 'object');
+    assert.equal(res.body.data.hash?.toLowerCase(), txHash.toLowerCase());
 
     const count = await Auditrail.count();
     const lastRecord = await Auditrail.findOne({
@@ -172,19 +174,19 @@ describe('POST /api/v1/wallet', () => {
       order: [['id', 'ASC']]
     });
 
-    assert.equal(lastRecord.action, 'GET_TRANSACTION_HISTORY');
+    assert.equal(lastRecord.action, 'GET_TRANSACTION_HISTORY_DETAIL');
   });
 
-  it('should return 400 if address or network is missing for history', async () => {
+  it('should return 400 when txHash or network is missing', async () => {
     const res = await request(app)
-      .post('/api/v1/transaction/history')
+      .post('/api/v1/wallet/transaction/detail')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
       .set('authorization', 'Bearer ' + validToken)
-      .send({ address: '' }); 
+      .send({ txHash: '' });
 
     assert.equal(res.status, 400);
-    assert.ok(res.body.message.includes('Missing address or network in the request body!'));
+    assert.ok(res.body.message.includes('Missing txHash or network in the request body!'));
   });
 
 });
