@@ -15,12 +15,8 @@ class HistoryService {
             `&sort=desc` +
             `&apikey=${apiKey}`;
 
-        console.log(`[HistoryService] Fetching TX history → ${url}`);
-
         const response = await fetch(url);
         const json = await response.json();
-
-        console.log("[HistoryService] Raw TX history:", json);
 
         if (json.status === "0" || !Array.isArray(json.result)) {
             throw new Error(json.message || "Failed to fetch transaction history");

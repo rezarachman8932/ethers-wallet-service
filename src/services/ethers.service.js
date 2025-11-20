@@ -52,12 +52,8 @@ class EthersServices {
             `&txhash=${txHash}` +
             `&apikey=${apiKey}`;
 
-        console.log(`[EthersService] Fetching TX detail → ${url}`);
-
         const response = await fetch(url);
         const json = await response.json();
-
-        console.log("[EthersService] Raw TX detail:", json);
 
         if (json.status === "0") {
             throw new Error(json.message || "Failed to fetch transaction detail");
