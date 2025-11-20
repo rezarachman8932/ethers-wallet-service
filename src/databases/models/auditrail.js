@@ -1,12 +1,11 @@
-'use strict'
+'use strict';
 const { v4: uuidv4 } = require('uuid');
-const { Model } = require('sequelize')
+const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   class Auditrail extends Model {
-    static associate(models) {
-      
-    }
+    // eslint-disable-next-line no-unused-vars
+    static associate(models) {}
   }
   Auditrail.init(
     {
@@ -14,12 +13,12 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         autoIncrement: true,
-        primaryKey: true
+        primaryKey: true,
       },
       uuid: {
         type: DataTypes.UUID,
         allowNull: false,
-        defaultValue: DataTypes.UUIDV4
+        defaultValue: DataTypes.UUIDV4,
       },
       action: {
         type: DataTypes.STRING(250),
@@ -36,16 +35,16 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
-        sequelize,
-        modelName: 'Auditrail',
-        underscored: false,
-        tableName: 'auditrails',
-        freezeTableName: true,
-        timestamps: true,
-        createdAt: 'createdAt',
-        updatedAt: 'updatedAt',
+      sequelize,
+      modelName: 'Auditrail',
+      underscored: false,
+      tableName: 'auditrails',
+      freezeTableName: true,
+      timestamps: true,
+      createdAt: 'createdAt',
+      updatedAt: 'updatedAt',
     }
   );
-  Auditrail.beforeCreate((data) => data.uuid = uuidv4());
+  Auditrail.beforeCreate((data) => (data.uuid = uuidv4()));
   return Auditrail;
-}
+};
