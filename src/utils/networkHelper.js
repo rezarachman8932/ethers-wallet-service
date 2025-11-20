@@ -39,8 +39,8 @@ class NetworkHelper {
                 };
             case "polygon":
                 return {
-                    apiUrl: "https://api.polygonscan.com/v2/api",
-                    apiKey: POLYGONSCAN_API_KEY,
+                    apiUrl: "https://api.etherscan.io/v2/api",
+                    apiKey: ETHERSCAN_API_KEY,
                     chainId: 137
                 };
             default:

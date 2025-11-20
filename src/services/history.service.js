@@ -4,6 +4,7 @@ class HistoryService {
 
     async getTransactionsByAddress(address, network) {
         const { apiUrl, apiKey, chainId } = networkHelper.getExplorerConfig(network);
+
         const url =
             `${apiUrl}?chainid=${chainId}` +
             `&module=account` +
@@ -14,10 +15,14 @@ class HistoryService {
             `&sort=desc` +
             `&apikey=${apiKey}`;
 
+        console.log(`[HistoryService] Fetching TX history → ${url}`);
+
         const response = await fetch(url);
         const json = await response.json();
 
-        if (!json.result) {
+        console.log("[HistoryService] Raw TX history:", json);
+
+        if (json.status === "0" || !Array.isArray(json.result)) {
             throw new Error(json.message || "Failed to fetch transaction history");
         }
 

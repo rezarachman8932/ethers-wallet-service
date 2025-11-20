@@ -44,6 +44,7 @@ class EthersServices {
     
     async getTransactionDetailByHash(txHash, network) {
         const { apiUrl, apiKey, chainId } = networkHelper.getExplorerConfig(network);
+
         const url =
             `${apiUrl}?chainid=${chainId}` +
             `&module=proxy` +
@@ -51,11 +52,19 @@ class EthersServices {
             `&txhash=${txHash}` +
             `&apikey=${apiKey}`;
 
+        console.log(`[EthersService] Fetching TX detail → ${url}`);
+
         const response = await fetch(url);
         const json = await response.json();
 
-        if (!json.result) {
+        console.log("[EthersService] Raw TX detail:", json);
+
+        if (json.status === "0") {
             throw new Error(json.message || "Failed to fetch transaction detail");
+        }
+
+        if (!json.result) {
+            throw new Error("Transaction not found");
         }
 
         return json.result;
