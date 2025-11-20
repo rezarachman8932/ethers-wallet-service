@@ -189,4 +189,41 @@ describe('POST /api/v1/wallet', () => {
     assert.ok(res.body.message.includes('Missing txHash or network in the request body!'));
   });
 
+  it('should fetch transaction history successfully for a valid address and network', async () => {
+    const address = '0x77af86669adfab004041c8ef0aa80a68ea1770e4';
+    const network = 'polygon';
+
+    const res = await request(app)
+      .post('/api/v1/wallet/transaction/history')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', 'Bearer ' + validToken)
+      .send({ address, network });
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.message, 'Transaction history fetched successfully!');
+
+    assert.ok(Array.isArray(res.body.data));
+
+    const count = await Auditrail.count();
+    const lastRecord = await Auditrail.findOne({
+      offset: count - 1,
+      order: [['id', 'ASC']]
+    });
+
+    assert.equal(lastRecord.action, 'GET_TRANSACTION_HISTORY');
+  });
+
+  it('should return 400 when address or network missing for transaction history', async () => {
+    const res = await request(app)
+      .post('/api/v1/wallet/transaction/history')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', 'Bearer ' + validToken)
+      .send({ address: '' });
+
+    assert.equal(res.status, 400);
+    assert.ok(res.body.message.includes('Missing address or network in the request body!'));
+  });
+
 });
