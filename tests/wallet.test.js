@@ -12,7 +12,7 @@ describe('POST /api/v1/wallet', () => {
   let validAccessKey, validToken;
 
   before(async function() {
-    this.timeout(10000);
+    this.timeout(5000);
 
     const { uuid, accessKey, token } = generatePlatformCredentials();
     const platform = await Platform.create({ uuid, name: 'Wallet Test New Reza', token, accessKey });
