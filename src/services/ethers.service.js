@@ -2,6 +2,7 @@ const { ethers } = require('ethers');
 const networkHelper = require('../utils/networkHelper');
 
 class EthersServices {
+
   createWallet() {
     const wallet = ethers.Wallet.createRandom();
     return {
@@ -40,6 +41,31 @@ class EthersServices {
       balanceEth,
     };
   }
+
+  async getTransactionDetailByHash(txHash, network) {
+    const { apiUrl, apiKey, chainId } = networkHelper.getExplorerConfig(network);
+
+    const url =
+      `${apiUrl}?chainid=${chainId}` +
+      `&module=proxy` +
+      `&action=eth_getTransactionByHash` +
+      `&txhash=${txHash}` +
+      `&apikey=${apiKey}`;
+
+    const response = await fetch(url);
+    const json = await response.json();
+
+    if (json.status === "0") {
+      throw new Error(json.message || "Failed to fetch transaction detail");
+    }
+
+    if (!json.result) {
+      throw new Error("Transaction not found");
+    }
+
+    return json.result;
+  }
+
 }
 
 module.exports = new EthersServices();

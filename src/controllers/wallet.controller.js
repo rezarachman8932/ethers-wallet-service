@@ -1,8 +1,9 @@
-const EthersService = require('../services/ethers.service');
 const response = require('../utils/response');
 const { StatusCodes } = require('http-status-codes');
 const AUDIT_ACTION = require('../constants/auditAction.constant');
 const AuditrailService = require('../services/auditrail.service');
+const EthersService = require('../services/ethers.service');
+const HistoryService = require('../services/history.service');
 
 const createWallet = async (req, res) => {
   try {
@@ -109,7 +110,7 @@ const getWalletBalance = async (req, res) => {
     if (!address || !network) {
       return response.response.error(
         res,
-        'Missing address or network in the request body!',
+        "Missing address or network in the request body!",
         null,
         StatusCodes.BAD_REQUEST
       );
@@ -124,15 +125,98 @@ const getWalletBalance = async (req, res) => {
 
     const balanceData = await EthersService.getBalance(address, network);
 
-    return response.response.success(res, 'Balance fetched successfully!', balanceData);
+    return response.response.success(
+      res,
+      "Balance fetched successfully!",
+      balanceData
+    );
   } catch (error) {
     return response.response.error(
       res,
-      'Unable to fetch wallet balance!',
+      "Unable to fetch wallet balance!",
+      error.message,
+      StatusCodes.UNPROCESSABLE_ENTITY
+    );
+  }
+}
+
+const getTransactionHistory = async (req, res) => {
+  try {
+    const { address, network } = req.body;
+    if (!address || !network) {
+      return response.response.error(
+        res,
+        "Missing address or network in the request body!",
+        null,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    const data = await HistoryService.getTransactionsByAddress(address, network);
+
+    await AuditrailService.create({
+      action: AUDIT_ACTION.GET_TRANSACTION_HISTORY,
+      header: req.headers,
+      body: req.body,
+      ipAddress: req.ip,
+    });
+
+    return response.response.success(
+      res,
+      "Transaction history fetched successfully!",
+      data
+    );
+  } catch (error) {
+    return response.response.error(
+      res,
+      "Failed to fetch transaction history!",
       error.message,
       StatusCodes.UNPROCESSABLE_ENTITY
     );
   }
 };
 
-module.exports = { createWallet, getWalletByPrivateKey, getWalletByMnemonic, getWalletBalance };
+const getTransactionDetail = async (req, res) => {
+  try {
+    const { txHash, network } = req.body;
+    if (!txHash || !network) {
+      return response.response.error(
+        res,
+        "Missing txHash or network in the request body!",
+        null,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    const data = await EthersService.getTransactionDetailByHash(txHash, network);
+
+    await AuditrailService.create({
+      action: AUDIT_ACTION.GET_TRANSACTION_HISTORY_DETAIL,
+      header: req.headers,
+      body: req.body,
+      ipAddress: req.ip,
+    });
+
+    return response.response.success(
+      res,
+      "Transaction detail fetched successfully!",
+      data
+    );
+  } catch (error) {
+    return response.response.error(
+      res,
+      "Failed to fetch transaction detail!",
+      error.message,
+      StatusCodes.UNPROCESSABLE_ENTITY
+    );
+  }
+};
+
+module.exports = {
+  createWallet,
+  getWalletByPrivateKey,
+  getWalletByMnemonic,
+  getWalletBalance,
+  getTransactionHistory,
+  getTransactionDetail
+}

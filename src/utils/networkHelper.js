@@ -18,7 +18,7 @@ class NetworkHelper {
    */
   getRpcUrl(network) {
     if (!network) {
-      throw new Error('Network parameter is required!');
+      throw new Error("Network parameter is required!");
     }
 
     const rpcUrl = this.networks[network.toLowerCase()];
@@ -28,6 +28,28 @@ class NetworkHelper {
 
     return rpcUrl;
   }
+
+  getExplorerConfig(network) {
+    const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
+
+    switch (network) {
+      case "ethereum":
+        return {
+          apiUrl: "https://api.etherscan.io/v2/api",
+          apiKey: ETHERSCAN_API_KEY,
+          chainId: 1
+        };
+      case "polygon":
+        return {
+          apiUrl: "https://api.etherscan.io/v2/api",
+          apiKey: ETHERSCAN_API_KEY,
+          chainId: 137
+        };
+      default:
+        throw new Error("Unsupported network");
+    }
+  }
+
 }
 
 module.exports = new NetworkHelper();

@@ -9,5 +9,7 @@ WalletRouter.post('/private', authMiddleware, WalletController.getWalletByPrivat
 WalletRouter.post('/mnemonic', authMiddleware, WalletController.getWalletByMnemonic);
 WalletRouter.post('/balance', authMiddleware, WalletController.getWalletBalance);
 WalletRouter.post('/convert', authMiddleware, ConversionController.convertFiatToCrypto);
+WalletRouter.post('/transaction/history', authMiddleware, WalletController.getTransactionHistory);
+WalletRouter.post('/transaction/detail', authMiddleware, WalletController.getTransactionDetail);
 
 module.exports = WalletRouter;
