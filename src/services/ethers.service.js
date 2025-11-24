@@ -90,6 +90,29 @@ class EthersServices {
     };
   }
 
+  async estimateGasForContractMethod({ network, contractAddress, abi, method, params = [], from, value }) {
+    try {
+      const rpcUrl = networkHelper.getRpcUrl(network);
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+
+      // If estimating payable function like incrementWithPayment()
+      const overrides = {
+        from,
+        value: value ? ethers.parseEther(value.toString()) : undefined
+      };
+
+      const contract = new ethers.Contract(contractAddress, abi, provider);
+      const gasEstimate = await contract[method].estimateGas(...(params || []), overrides);
+
+      return {
+        gasEstimate: gasEstimate.toString()
+      };
+    } catch (error) {
+      console.error("[EthersService] Gas estimation error:", error);
+      throw new Error(error.reason || error.message || "Failed to estimate gas");
+    }
+  }
+
 }
 
 module.exports = new EthersServices();
