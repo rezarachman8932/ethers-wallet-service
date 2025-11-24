@@ -66,36 +66,11 @@ class EthersServices {
     return json.result;
   }
 
-  async estimateSmartContractAction({ network, contractAddress, abi, method, params, from }) {
-    const rpcUrl = networkHelper.getRpcUrl(network);
-    const provider = new ethers.JsonRpcProvider(rpcUrl);
-    const contract = new ethers.Contract(contractAddress, abi, provider);
-
-    if (!contract[method]) {
-      throw new Error(`Method "${method}" not found in ABI`);
-    }
-
-    const gasLimit = await contract[method].estimateGas(...params, { from });
-    const gasPrice = await provider.getGasPrice();
-
-    // Calculate full cost
-    const estimatedCostWei = gasLimit * gasPrice;
-    const estimatedCostEth = ethers.formatEther(estimatedCostWei);
-
-    return {
-      gasLimit: gasLimit.toString(),
-      gasPrice: gasPrice.toString(),
-      estimatedCostWei: estimatedCostWei.toString(),
-      estimatedCostEth
-    };
-  }
-
   async estimateGasForContractMethod({ network, contractAddress, abi, method, params = [], from, value }) {
     try {
       const rpcUrl = networkHelper.getRpcUrl(network);
       const provider = new ethers.JsonRpcProvider(rpcUrl);
 
-      // If estimating payable function like incrementWithPayment()
       const overrides = {
         from,
         value: value ? ethers.parseEther(value.toString()) : undefined

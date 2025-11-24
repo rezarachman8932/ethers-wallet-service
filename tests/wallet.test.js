@@ -29,6 +29,23 @@ describe('POST /api/v1/wallet', () => {
     await sequelize.close();
   });
 
+  const abi = [
+    {
+      "inputs": [],
+      "name": "increment",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getTotalReceived",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ];
+
   it('should create a new wallet successfully', async () => {
     const res = await request(app)
       .post('/api/v1/wallet')
@@ -276,6 +293,70 @@ describe('POST /api/v1/wallet', () => {
     assert.equal(res.status, 400);
     assert.ok(res.body.message.includes('Missing amount, fiatCurrency or cryptoSymbol!'));
 
+  });
+
+  it('should estimate gas for increment() successfully', async () => {
+    const payload = {
+      network: "sepolia",
+      contractAddress: "0x604204fdE0bf9efB9F55439D2f75c218e20D1B8d",
+      abi,
+      method: "increment",
+      params: [],
+      from: "0x732874c027304f60a0561631cD615C34D82965a9"
+    };
+
+    const res = await request(app)
+      .post('/api/v1/wallet/estimate')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${validToken}`)
+      .send(payload);
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.message, 'Estimation cost  fetched successfully!');
+    assert.ok(Number(res.body.data.gasEstimate) > 0);
+
+    const count = await Auditrail.count();
+    const record = await Auditrail.findOne({
+      offset: count - 1,
+      order: [['id', 'ASC']]
+    });
+
+    assert.equal(record.action, 'GET_ESTIMATION_COST');
+  });
+
+  it('should estimate gas for getTotalReceived() successfully', async () => {
+    const payload = {
+      network: "sepolia",
+      contractAddress: "0x604204fdE0bf9efB9F55439D2f75c218e20D1B8d",
+      abi,
+      method: "getTotalReceived",
+      params: [],
+      from: "0x732874c027304f60a0561631cD615C34D82965a9"
+    };
+
+    const res = await request(app)
+      .post('/api/v1/wallet/estimate')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${validToken}`)
+      .send(payload);
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.message, 'Estimation cost  fetched successfully!');
+    assert.ok(Number(res.body.data.gasEstimate) > 0);
+  });
+
+  it('should return 400 when required fields are missing', async () => {
+    const res = await request(app)
+      .post('/api/v1/wallet/estimate')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${validToken}`)
+      .send({});
+
+    assert.equal(res.status, 400);
+    assert.ok(res.body.message.includes('Missing required fields (network, contractAddress, abi, method, from)!'));
   });
 
 });
