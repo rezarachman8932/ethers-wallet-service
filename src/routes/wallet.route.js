@@ -11,5 +11,6 @@ WalletRouter.post('/balance', authMiddleware, WalletController.getWalletBalance)
 WalletRouter.post('/convert', authMiddleware, ConversionController.convertFiatToCrypto);
 WalletRouter.post('/transaction/history', authMiddleware, WalletController.getTransactionHistory);
 WalletRouter.post('/transaction/detail', authMiddleware, WalletController.getTransactionDetail);
+WalletRouter.post("/estimate", authMiddleware, WalletController.getEstimateCost);
 
 module.exports = WalletRouter;
