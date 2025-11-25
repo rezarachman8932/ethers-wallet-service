@@ -4,6 +4,7 @@ const AUDIT_ACTION = require('../constants/auditAction.constant');
 const AuditrailService = require('../services/auditrail.service');
 const EthersService = require('../services/ethers.service');
 const HistoryService = require('../services/history.service');
+const { get } = require('lodash');
 
 const createWallet = async (req, res) => {
   try {
@@ -257,6 +258,42 @@ const getGasEstimation = async (req, res) => {
   }
 };
 
+const getGasPrice = async (req, res) => {
+  try {
+    const { network } = req.query;
+    if (!network) {
+      return response.response.error(
+        res,
+        "Query param network is required!",
+        null,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    const result = await EthersService.getGasPrice(network);
+
+    await AuditrailService.create({
+      action: AUDIT_ACTION.GET_GAS_PRICE,
+      header: req.headers,
+      body: req.body,
+      ipAddress: req.ip,
+    });
+
+    return response.response.success(
+      res,
+      "Gas price fetched successfully!",
+      result
+    );
+  } catch (error) {
+    return response.response.error(
+      res,
+      "Failed to get gas price!",
+      error.message,
+      StatusCodes.UNPROCESSABLE_ENTITY
+    );
+  }
+};
+
 module.exports = {
   createWallet,
   getWalletByPrivateKey,
@@ -264,5 +301,6 @@ module.exports = {
   getWalletBalance,
   getTransactionHistory,
   getTransactionDetail,
-  getGasEstimation
+  getGasEstimation,
+  getGasPrice
 }
