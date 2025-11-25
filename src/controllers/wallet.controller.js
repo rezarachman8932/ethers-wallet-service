@@ -212,11 +212,57 @@ const getTransactionDetail = async (req, res) => {
   }
 };
 
+const getGasEstimation = async (req, res) => {
+  try {
+    const { network, contractAddress, abi, method, params, from, value } = req.body;
+
+    if (!network || !contractAddress || !abi || !method || !from) {
+      return response.response.error(
+        res,
+        "Missing required fields (network, contractAddress, abi, method, from)!",
+        null,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    const gas = await EthersService.estimateGasForContractMethod({
+      network,
+      contractAddress,
+      abi,
+      method,
+      params,
+      from,
+      value
+    });
+
+    await AuditrailService.create({
+      action: AUDIT_ACTION.GET_ESTIMATION_COST,
+      header: req.headers,
+      body: req.body,
+      ipAddress: req.ip,
+    });
+
+    return response.response.success(
+      res,
+      "Estimation cost  fetched successfully!",
+      gas
+    );
+  } catch (error) {
+    return response.response.error(
+      res,
+      "Failed to get the estimation cost!",
+      error.message,
+      StatusCodes.UNPROCESSABLE_ENTITY
+    );
+  }
+};
+
 module.exports = {
   createWallet,
   getWalletByPrivateKey,
   getWalletByMnemonic,
   getWalletBalance,
   getTransactionHistory,
-  getTransactionDetail
+  getTransactionDetail,
+  getGasEstimation
 }
