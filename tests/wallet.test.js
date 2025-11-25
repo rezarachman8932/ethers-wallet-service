@@ -359,4 +359,41 @@ describe('POST /api/v1/wallet', () => {
     assert.ok(res.body.message.includes('Missing required fields (network, contractAddress, abi, method, from)!'));
   });
 
+  it('should return gas price for Ethereum', async () => {
+    const res = await request(app)
+      .get('/api/v1/wallet/gas-price?network=ethereum')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${validToken}`);
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.data.network, 'ethereum');
+    assert.ok(res.body.data.gasPrice);
+    assert.ok(res.body.data.maxFeePerGas);
+  });
+
+  it('should return gas price for Polygon', async () => {
+    const res = await request(app)
+      .get('/api/v1/wallet/gas-price?network=polygon')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${validToken}`);
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.data.network, 'polygon');
+    assert.ok(res.body.data.gasPrice);
+    assert.ok(res.body.data.maxFeePerGas);
+  });
+
+  it('should return 400 if network parameter is missing', async () => {
+    const res = await request(app)
+      .get('/api/v1/wallet/gas-price')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${validToken}`);
+
+    assert.equal(res.status, 400);
+    assert.ok(res.body.message.includes('Query param network is required!'));
+  });
+
 });
