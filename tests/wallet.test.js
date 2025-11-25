@@ -359,4 +359,33 @@ describe('POST /api/v1/wallet', () => {
     assert.ok(res.body.message.includes('Missing required fields (network, contractAddress, abi, method, from)!'));
   });
 
+  it('should transfer native token successfully', async function () {
+    const body = {
+      network: 'sepolia',
+      to: '0xead9277CD7Bf281806155089E82391b2B56AbB7b',
+      amount: '0.0001',
+      privateKey: '0x1b3d9046d5de649e6460e5c2e13de084bb4623d5025733d3eb73bdbae48c7298'
+    };
+
+    const res = await request(app)
+      .post('/api/v1/wallet/transfer')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${validToken}`)
+      .send(body);
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.message, 'Balance transferred successfully!');
+    assert.ok(res.body.data.txHash.startsWith('0x'));
+    assert.ok(BigInt(res.body.data.gasLimit) > 0n);
+
+    const count = await Auditrail.count();
+    const lastRecord = await Auditrail.findOne({
+      offset: count - 1,
+      order: [['id', 'ASC']]
+    });
+
+    assert.equal(lastRecord.action, 'TRANSFER_BALANCE');
+  });
+
 });
