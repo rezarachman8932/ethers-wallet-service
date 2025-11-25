@@ -257,6 +257,48 @@ const getGasEstimation = async (req, res) => {
   }
 };
 
+const transfer = async (req, res) => {
+  try {
+    const { network, to, amount, privateKey } = req.body;
+
+    if (!network || !to || !amount || !privateKey) {
+      return response.response.error(
+        res,
+        "Missing required fields!",
+        null,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    const result = await EthersService.transferNativeToken({ 
+      network,
+      to,
+      amount,
+      privateKey,
+    });
+
+    await AuditrailService.create({
+      action: AUDIT_ACTION.TRANSFER_BALANCE,
+      header: req.headers,
+      body: req.body,
+      ipAddress: req.ip,
+    });
+
+    return response.response.success(
+      res,
+      "Balance transferred successfully!",
+      result
+    );
+  } catch (error) {
+    return response.response.error(
+      res,
+      "Transfer balance failed",
+      error.message,
+      StatusCodes.UNPROCESSABLE_ENTITY
+    );
+  }
+};
+
 module.exports = {
   createWallet,
   getWalletByPrivateKey,
@@ -264,5 +306,6 @@ module.exports = {
   getWalletBalance,
   getTransactionHistory,
   getTransactionDetail,
-  getGasEstimation
+  getGasEstimation,
+  transfer,
 }
