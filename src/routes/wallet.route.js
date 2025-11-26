@@ -13,5 +13,6 @@ WalletRouter.post('/transaction/history', authMiddleware, WalletController.getTr
 WalletRouter.post('/transaction/detail', authMiddleware, WalletController.getTransactionDetail);
 WalletRouter.post("/estimate", authMiddleware, WalletController.getGasEstimation);
 WalletRouter.get("/gas-price", authMiddleware, WalletController.getGasPrice);
+WalletRouter.post("/transfer", authMiddleware, WalletController.transfer);
 
 module.exports = WalletRouter;

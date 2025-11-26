@@ -4,6 +4,7 @@ const app = require('../src/server');
 const { sequelize } = require('../src/databases/models');
 const { generatePlatformCredentials } = require('../src/utils/helper');
 const models = require('../src/databases/models');
+const { time } = require('console');
 const Platform = models.Platform;
 const Auditrail = models.Auditrail;
 
@@ -11,7 +12,7 @@ describe('POST /api/v1/wallet', () => {
   let validAccessKey, validToken;
 
   before(async function () {
-    this.timeout(5000);
+    this.timeout(3000);
 
     const { uuid, accessKey, token } = generatePlatformCredentials();
     const platform = await Platform.create({
@@ -171,7 +172,7 @@ describe('POST /api/v1/wallet', () => {
   });
 
   it('should fetch transaction detail successfully for a valid txHash and network', async function () {
-    this.timeout(5000);
+    this.timeout(3000);
 
     const txHash = '0x3384291afad5486985d0d79be408b0dc1bfa6b703ae728135ff57038c524dd1d';
     const network = 'polygon';
@@ -372,7 +373,9 @@ describe('POST /api/v1/wallet', () => {
     assert.ok(res.body.data.maxFeePerGas);
   });
 
-  it('should return gas price for Polygon', async () => {
+  it('should return gas price for Polygon', async function () {
+    this.timeout(5000);
+
     const res = await request(app)
       .get('/api/v1/wallet/gas-price?network=polygon')
       .set('Accept', 'application/json')
@@ -394,6 +397,35 @@ describe('POST /api/v1/wallet', () => {
 
     assert.equal(res.status, 400);
     assert.ok(res.body.message.includes('Query param network is required!'));
+  });
+
+  it('should transfer native token successfully', async function () {
+    const body = {
+      network: 'sepolia',
+      to: '0xead9277CD7Bf281806155089E82391b2B56AbB7b',
+      amount: '0.0001',
+      privateKey: '0x1b3d9046d5de649e6460e5c2e13de084bb4623d5025733d3eb73bdbae48c7298'
+    };
+
+    const res = await request(app)
+      .post('/api/v1/wallet/transfer')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${validToken}`)
+      .send(body);
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.message, 'Balance transferred successfully!');
+    assert.ok(res.body.data.txHash.startsWith('0x'));
+    assert.ok(BigInt(res.body.data.gasLimit) > 0n);
+
+    const count = await Auditrail.count();
+    const lastRecord = await Auditrail.findOne({
+      offset: count - 1,
+      order: [['id', 'ASC']]
+    });
+
+    assert.equal(lastRecord.action, 'TRANSFER_BALANCE');
   });
 
 });

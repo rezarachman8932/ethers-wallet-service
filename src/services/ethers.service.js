@@ -88,6 +88,41 @@ class EthersServices {
     }
   }
 
+  async transferNativeToken({ network, to, amount, privateKey }) {
+    try {
+      const rpcUrl = networkHelper.getRpcUrl(network);
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+
+      const wallet = new ethers.Wallet(privateKey, provider);
+      const valueInWei = ethers.parseEther(amount.toString());
+
+      // Estimate gas using the wallet’s address
+      const gasLimit = await provider.estimateGas({
+        to,
+        value: valueInWei,
+        from: wallet.address,
+      });
+
+      // Optional 20% buffer (recommended in production)
+      const GAS_BUFFER_NUMERATOR = 12n;
+      const GAS_BUFFER_DENOMINATOR = 10n;
+      const gasLimitBuffered = gasLimit * GAS_BUFFER_NUMERATOR / GAS_BUFFER_DENOMINATOR;
+
+      const tx = await wallet.sendTransaction({
+        to,
+        value: valueInWei,
+        gasLimit: gasLimitBuffered,
+      });
+
+      return {
+        txHash: tx.hash,
+        gasLimit: gasLimitBuffered.toString(),
+      };
+    } catch (error) {
+      throw new Error(error.message || "Failed to transfer native token");
+    }
+  }
+
   async getGasPrice(network) {
     try {
       const rpcUrl = networkHelper.getRpcUrl(network);
