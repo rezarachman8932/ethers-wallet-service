@@ -4,6 +4,7 @@ const app = require('../src/server');
 const { sequelize } = require('../src/databases/models');
 const { generatePlatformCredentials } = require('../src/utils/helper');
 const models = require('../src/databases/models');
+const { time } = require('console');
 const Platform = models.Platform;
 const Auditrail = models.Auditrail;
 
@@ -11,7 +12,7 @@ describe('POST /api/v1/wallet', () => {
   let validAccessKey, validToken;
 
   before(async function () {
-    this.timeout(5000);
+    this.timeout(3000);
 
     const { uuid, accessKey, token } = generatePlatformCredentials();
     const platform = await Platform.create({
@@ -171,7 +172,7 @@ describe('POST /api/v1/wallet', () => {
   });
 
   it('should fetch transaction detail successfully for a valid txHash and network', async function () {
-    this.timeout(5000);
+    this.timeout(3000);
 
     const txHash = '0x3384291afad5486985d0d79be408b0dc1bfa6b703ae728135ff57038c524dd1d';
     const network = 'polygon';
@@ -357,6 +358,45 @@ describe('POST /api/v1/wallet', () => {
 
     assert.equal(res.status, 400);
     assert.ok(res.body.message.includes('Missing required fields (network, contractAddress, abi, method, from)!'));
+  });
+
+  it('should return gas price for Ethereum', async () => {
+    const res = await request(app)
+      .get('/api/v1/wallet/gas-price?network=ethereum')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${validToken}`);
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.data.network, 'ethereum');
+    assert.ok(res.body.data.gasPrice);
+    assert.ok(res.body.data.maxFeePerGas);
+  });
+
+  it('should return gas price for Polygon', async function () {
+    this.timeout(5000);
+
+    const res = await request(app)
+      .get('/api/v1/wallet/gas-price?network=polygon')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${validToken}`);
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.data.network, 'polygon');
+    assert.ok(res.body.data.gasPrice);
+    assert.ok(res.body.data.maxFeePerGas);
+  });
+
+  it('should return 400 if network parameter is missing', async () => {
+    const res = await request(app)
+      .get('/api/v1/wallet/gas-price')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${validToken}`);
+
+    assert.equal(res.status, 400);
+    assert.ok(res.body.message.includes('Query param network is required!'));
   });
 
   it('should transfer native token successfully', async function () {

@@ -123,6 +123,22 @@ class EthersServices {
     }
   }
 
+  async getGasPrice(network) {
+    try {
+      const rpcUrl = networkHelper.getRpcUrl(network);
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const feeData = await provider.getFeeData();
+      return {
+        network,
+        gasPrice: feeData.gasPrice?.toString() || null,
+        maxFeePerGas: feeData.maxFeePerGas?.toString() || null,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.toString() || null,
+      };
+    } catch (error) {
+      throw new Error(error.message || "Failed to get gas price");
+    }
+  }
+
 }
 
 module.exports = new EthersServices();
