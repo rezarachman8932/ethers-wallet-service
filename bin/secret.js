@@ -12,6 +12,8 @@ const getGoogleSecret = async () => {
       // We just have to reassign it back to process.env if the service is running from Cloud Run.
       const envVars = JSON.parse(process.env.GCLOUDENV);
       Object.assign(process.env, envVars[process.env.SM_ENV] || 'dev');
+      console.log('secret manager env:', process.env.SM_ENV);
+      console.log(process.env.NODE_PORT);
     } catch (exception) {
       console.warn(exception);
       try {
@@ -30,6 +32,8 @@ const getGoogleSecret = async () => {
         Object.assign(process.env, envVars[process.env.SM_ENV] || 'dev');
         // eslint-disable-next-line no-console
         console.log('loaded secrets');
+        console.log('secret manager env:', process.env.SM_ENV);
+        console.log(process.env.NODE_PORT);
       } catch (exception) {
         console.warn(exception);
         console.error('Failed to retrieve google secrets');
