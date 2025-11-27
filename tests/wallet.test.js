@@ -32,19 +32,19 @@ describe('POST /api/v1/wallet', () => {
 
   const abi = [
     {
-      "inputs": [],
-      "name": "increment",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      inputs: [],
+      name: 'increment',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
     },
     {
-      "inputs": [],
-      "name": "getTotalReceived",
-      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "stateMutability": "view",
-      "type": "function"
-    }
+      inputs: [],
+      name: 'getTotalReceived',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
   ];
 
   it('should create a new wallet successfully', async () => {
@@ -193,7 +193,7 @@ describe('POST /api/v1/wallet', () => {
     const count = await Auditrail.count();
     const lastRecord = await Auditrail.findOne({
       offset: count - 1,
-      order: [['id', 'ASC']]
+      order: [['id', 'ASC']],
     });
 
     assert.equal(lastRecord.action, 'GET_TRANSACTION_HISTORY_DETAIL');
@@ -230,7 +230,7 @@ describe('POST /api/v1/wallet', () => {
     const count = await Auditrail.count();
     const lastRecord = await Auditrail.findOne({
       offset: count - 1,
-      order: [['id', 'ASC']]
+      order: [['id', 'ASC']],
     });
 
     assert.equal(lastRecord.action, 'GET_TRANSACTION_HISTORY');
@@ -293,17 +293,16 @@ describe('POST /api/v1/wallet', () => {
 
     assert.equal(res.status, 400);
     assert.ok(res.body.message.includes('Missing amount, fiatCurrency or cryptoSymbol!'));
-
   });
 
   it('should estimate gas for increment() successfully', async () => {
     const payload = {
-      network: "sepolia",
-      contractAddress: "0x604204fdE0bf9efB9F55439D2f75c218e20D1B8d",
+      network: 'sepolia',
+      contractAddress: '0x604204fdE0bf9efB9F55439D2f75c218e20D1B8d',
       abi,
-      method: "increment",
+      method: 'increment',
       params: [],
-      from: "0x732874c027304f60a0561631cD615C34D82965a9"
+      from: '0x732874c027304f60a0561631cD615C34D82965a9',
     };
 
     const res = await request(app)
@@ -320,7 +319,7 @@ describe('POST /api/v1/wallet', () => {
     const count = await Auditrail.count();
     const record = await Auditrail.findOne({
       offset: count - 1,
-      order: [['id', 'ASC']]
+      order: [['id', 'ASC']],
     });
 
     assert.equal(record.action, 'GET_ESTIMATION_COST');
@@ -328,12 +327,12 @@ describe('POST /api/v1/wallet', () => {
 
   it('should estimate gas for getTotalReceived() successfully', async () => {
     const payload = {
-      network: "sepolia",
-      contractAddress: "0x604204fdE0bf9efB9F55439D2f75c218e20D1B8d",
+      network: 'sepolia',
+      contractAddress: '0x604204fdE0bf9efB9F55439D2f75c218e20D1B8d',
       abi,
-      method: "getTotalReceived",
+      method: 'getTotalReceived',
       params: [],
-      from: "0x732874c027304f60a0561631cD615C34D82965a9"
+      from: '0x732874c027304f60a0561631cD615C34D82965a9',
     };
 
     const res = await request(app)
@@ -357,7 +356,11 @@ describe('POST /api/v1/wallet', () => {
       .send({});
 
     assert.equal(res.status, 400);
-    assert.ok(res.body.message.includes('Missing required fields (network, contractAddress, abi, method, from)!'));
+    assert.ok(
+      res.body.message.includes(
+        'Missing required fields (network, contractAddress, abi, method, from)!'
+      )
+    );
   });
 
   it('should return gas price for Ethereum', async () => {
@@ -404,7 +407,7 @@ describe('POST /api/v1/wallet', () => {
       network: 'sepolia',
       to: '0xead9277CD7Bf281806155089E82391b2B56AbB7b',
       amount: '0.0001',
-      privateKey: '0x1b3d9046d5de649e6460e5c2e13de084bb4623d5025733d3eb73bdbae48c7298'
+      privateKey: '0x1b3d9046d5de649e6460e5c2e13de084bb4623d5025733d3eb73bdbae48c7298',
     };
 
     const res = await request(app)
@@ -422,7 +425,7 @@ describe('POST /api/v1/wallet', () => {
     const count = await Auditrail.count();
     const lastRecord = await Auditrail.findOne({
       offset: count - 1,
-      order: [['id', 'ASC']]
+      order: [['id', 'ASC']],
     });
 
     assert.equal(lastRecord.action, 'TRANSFER_BALANCE');
@@ -488,5 +491,4 @@ describe('POST /api/v1/wallet', () => {
     assert.ok(res.body.data.block);
     assert.ok(res.body.data.block.number >= 0);
   });
-
 });

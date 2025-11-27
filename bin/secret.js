@@ -11,7 +11,7 @@ const getGoogleSecret = async () => {
       // Google Cloud Run processes the secrets authentication and stores it in the variable of choice.
       // We just have to reassign it back to process.env if the service is running from Cloud Run.
       const envVars = JSON.parse(process.env.GCLOUDENV);
-      Object.assign(process.env, envVars);
+      Object.assign(process.env, envVars[process.env.SM_ENV] || 'dev');
     } catch (exception) {
       console.warn(exception);
       try {
@@ -27,7 +27,7 @@ const getGoogleSecret = async () => {
 
         const secretPayload = version.payload.data.toString('utf8');
         const envVars = JSON.parse(secretPayload);
-        Object.assign(process.env, envVars);
+        Object.assign(process.env, envVars[process.env.SM_ENV] || 'dev');
         // eslint-disable-next-line no-console
         console.log('loaded secrets');
       } catch (exception) {
