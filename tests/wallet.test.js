@@ -428,4 +428,65 @@ describe('POST /api/v1/wallet', () => {
     assert.equal(lastRecord.action, 'TRANSFER_BALANCE');
   });
 
+  it('should fetch the latest block successfully', async () => {
+    const network = 'ethereum';
+
+    const res = await request(app)
+      .get('/api/v1/wallet/block/latest')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${validToken}`)
+      .query({ network });
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.message, 'Latest block fetched successfully!');
+    assert.ok(res.body.data.block);
+    assert.ok(res.body.data.block.number >= 0);
+  });
+
+  it('should return 400 when network missing for latest block', async () => {
+    const res = await request(app)
+      .get('/api/v1/wallet/block/latest')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${validToken}`);
+
+    assert.equal(res.status, 400);
+    assert.ok(res.body.message.includes("Query parameter of 'network' is required!"));
+  });
+
+  it('should fetch the latest block successfully', async () => {
+    const network = 'polygon';
+    const hash = '0x3b95830c8752b3138142e89e720c6106acf4d6e0bd486354df6c095b6f0d36a5';
+
+    const res = await request(app)
+      .get('/api/v1/wallet/block/hash')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${validToken}`)
+      .query({ network, hash });
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.message, 'Block fetched by hash successfully!');
+    assert.ok(res.body.data.block);
+    assert.ok(res.body.data.block.number >= 0);
+  });
+
+  it('should fetch the latest block successfully', async () => {
+    const network = 'polygon';
+    const blockNumber = '72551865';
+
+    const res = await request(app)
+      .get('/api/v1/wallet/block/number')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${validToken}`)
+      .query({ network, blockNumber });
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.message, 'Block fetched by number successfully!');
+    assert.ok(res.body.data.block);
+    assert.ok(res.body.data.block.number >= 0);
+  });
+
 });
