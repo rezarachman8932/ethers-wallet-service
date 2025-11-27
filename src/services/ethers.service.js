@@ -2,7 +2,6 @@ const { ethers } = require('ethers');
 const networkHelper = require('../utils/networkHelper');
 
 class EthersServices {
-
   createWallet() {
     const wallet = ethers.Wallet.createRandom();
     return {
@@ -55,36 +54,44 @@ class EthersServices {
     const response = await fetch(url);
     const json = await response.json();
 
-    if (json.status === "0") {
-      throw new Error(json.message || "Failed to fetch transaction detail");
+    if (json.status === '0') {
+      throw new Error(json.message || 'Failed to fetch transaction detail');
     }
 
     if (!json.result) {
-      throw new Error("Transaction not found");
+      throw new Error('Transaction not found');
     }
 
     return json.result;
   }
 
-  async estimateGasForContractMethod({ network, contractAddress, abi, method, params = [], from, value }) {
+  async estimateGasForContractMethod({
+    network,
+    contractAddress,
+    abi,
+    method,
+    params = [],
+    from,
+    value,
+  }) {
     try {
       const rpcUrl = networkHelper.getRpcUrl(network);
       const provider = new ethers.JsonRpcProvider(rpcUrl);
 
       const overrides = {
         from,
-        value: value ? ethers.parseEther(value.toString()) : undefined
+        value: value ? ethers.parseEther(value.toString()) : undefined,
       };
 
       const contract = new ethers.Contract(contractAddress, abi, provider);
       const gasEstimate = await contract[method].estimateGas(...(params || []), overrides);
 
       return {
-        gasEstimate: gasEstimate.toString()
+        gasEstimate: gasEstimate.toString(),
       };
     } catch (error) {
-      console.error("[EthersService] Gas estimation error:", error);
-      throw new Error(error.reason || error.message || "Failed to estimate gas");
+      console.error('[EthersService] Gas estimation error:', error);
+      throw new Error(error.reason || error.message || 'Failed to estimate gas');
     }
   }
 
@@ -106,7 +113,7 @@ class EthersServices {
       // Optional 20% buffer (recommended in production)
       const GAS_BUFFER_NUMERATOR = 12n;
       const GAS_BUFFER_DENOMINATOR = 10n;
-      const gasLimitBuffered = gasLimit * GAS_BUFFER_NUMERATOR / GAS_BUFFER_DENOMINATOR;
+      const gasLimitBuffered = (gasLimit * GAS_BUFFER_NUMERATOR) / GAS_BUFFER_DENOMINATOR;
 
       const tx = await wallet.sendTransaction({
         to,
@@ -119,7 +126,7 @@ class EthersServices {
         gasLimit: gasLimitBuffered.toString(),
       };
     } catch (error) {
-      throw new Error(error.message || "Failed to transfer native token");
+      throw new Error(error.message || 'Failed to transfer native token');
     }
   }
 
@@ -135,10 +142,51 @@ class EthersServices {
         maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.toString() || null,
       };
     } catch (error) {
-      throw new Error(error.message || "Failed to get gas price");
+      throw new Error(error.message || 'Failed to get gas price');
     }
   }
 
+  async getLatestBlock(network) {
+    try {
+      const rpcUrl = networkHelper.getRpcUrl(network);
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const block = await provider.getBlock('latest');
+      return {
+        network,
+        block,
+      };
+    } catch (error) {
+      throw new Error(error.message || 'Failed to fetch latest block');
+    }
+  }
+
+  async getBlockByHash({ network, hash }) {
+    try {
+      const rpcUrl = networkHelper.getRpcUrl(network);
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const block = await provider.getBlock(hash);
+      return {
+        network,
+        block,
+      };
+    } catch (error) {
+      throw new Error(error.message || 'Failed to fetch block by hash');
+    }
+  }
+
+  async getBlockByNumber({ network, blockNumber }) {
+    try {
+      const rpcUrl = networkHelper.getRpcUrl(network);
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const block = await provider.getBlock(Number(blockNumber));
+      return {
+        network,
+        block,
+      };
+    } catch (error) {
+      throw new Error(error.message || 'Failed to fetch block by number');
+    }
+  }
 }
 
 module.exports = new EthersServices();
