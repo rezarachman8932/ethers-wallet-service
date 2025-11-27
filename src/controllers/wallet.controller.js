@@ -5,6 +5,7 @@ const AuditrailService = require('../services/auditrail.service');
 const EthersService = require('../services/ethers.service');
 const HistoryService = require('../services/history.service');
 const { get } = require('lodash');
+const ethersService = require('../services/ethers.service');
 
 const createWallet = async (req, res) => {
   try {
@@ -307,7 +308,7 @@ const transfer = async (req, res) => {
       );
     }
 
-    const result = await EthersService.transferNativeToken({ 
+    const result = await EthersService.transferNativeToken({
       network,
       to,
       amount,
@@ -336,6 +337,114 @@ const transfer = async (req, res) => {
   }
 };
 
+const getLatestBlock = async (req, res) => {
+  try {
+    const { network } = req.query;
+    if (!network) {
+      return response.response.error(
+        res,
+        "Query parameter of 'network' is required!",
+        null,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    const result = await ethersService.getLatestBlock(network);
+
+    await AuditrailService.create({
+      action: AUDIT_ACTION.GET_LATEST_BLOCK,
+      header: req.headers,
+      body: req.body,
+      ipAddress: req.ip,
+    });
+
+    return response.response.success(
+      res,
+      "Latest block fetched successfully!",
+      result
+    );
+  } catch (error) {
+    return response.response.error(
+      res,
+      "Latest block failed to get!",
+      error.message,
+      StatusCodes.UNPROCESSABLE_ENTITY
+    );
+  }
+};
+
+const getBlockByHash = async (req, res) => {
+  try {
+    const { network, hash } = req.query;
+    if (!network || !hash) {
+      return response.response.error(
+        res,
+        "Query parameters of 'network' and 'hash' are required!",
+        null,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    const result = await ethersService.getBlockByHash({ network, hash });
+
+    await AuditrailService.create({
+      action: AUDIT_ACTION.GET_BLOCK_BY_HASH,
+      header: req.headers,
+      body: req.body,
+      ipAddress: req.ip,
+    });
+
+    return response.response.success(
+      res,
+      "Block fetched by hash successfully!",
+      result
+    );
+  } catch (error) {
+    return response.response.error(
+      res,
+      "Block fetched by hash failed to get!",
+      error.message,
+      StatusCodes.UNPROCESSABLE_ENTITY
+    );
+  }
+};
+
+const getBlockByNumber = async (req, res) => {
+  try {
+    const { network, blockNumber } = req.query;
+    if (!network || !blockNumber) {
+      return response.response.error(
+        res,
+        "Query parameters of 'network' and 'blockNumber' are required!",
+        null,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    const result = await ethersService.getBlockByNumber({ network, blockNumber });
+
+    await AuditrailService.create({
+      action: AUDIT_ACTION.GET_BLOCK_BY_NUMBER,
+      header: req.headers,
+      body: req.body,
+      ipAddress: req.ip,
+    });
+
+    return response.response.success(
+      res,
+      "Block fetched by number successfully!",
+      result
+    );
+  } catch (error) {
+    return response.response.error(
+      res,
+      "Block fetched by number failed to get!",
+      error.message,
+      StatusCodes.UNPROCESSABLE_ENTITY
+    );
+  }
+};
+
 module.exports = {
   createWallet,
   getWalletByPrivateKey,
@@ -345,5 +454,8 @@ module.exports = {
   getTransactionDetail,
   getGasEstimation,
   getGasPrice,
-  transfer
+  transfer,
+  getLatestBlock,
+  getBlockByHash,
+  getBlockByNumber
 }

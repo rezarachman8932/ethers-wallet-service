@@ -139,6 +139,48 @@ class EthersServices {
     }
   }
 
+  async getLatestBlock(network) {
+    try {
+      const rpcUrl = networkHelper.getRpcUrl(network);
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const block = await provider.getBlock('latest');
+      return {
+        network,
+        block,
+      };
+    } catch (error) {
+      throw new Error(error.message || 'Failed to fetch latest block');
+    }
+  }
+
+  async getBlockByHash({ network, hash }) {
+    try {
+      const rpcUrl = networkHelper.getRpcUrl(network);
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const block = await provider.getBlock(hash);
+      return {
+        network,
+        block,
+      };
+    } catch (error) {
+      throw new Error(error.message || 'Failed to fetch block by hash');
+    }
+  }
+
+  async getBlockByNumber({ network, blockNumber }) {
+    try {
+      const rpcUrl = networkHelper.getRpcUrl(network);
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const block = await provider.getBlock(Number(blockNumber));
+      return {
+        network,
+        block,
+      };
+    } catch (error) {
+      throw new Error(error.message || 'Failed to fetch block by number');
+    }
+  }
+
 }
 
 module.exports = new EthersServices();
