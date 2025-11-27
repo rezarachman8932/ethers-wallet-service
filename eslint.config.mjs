@@ -12,7 +12,7 @@ export default defineConfig([
     files: ["**/*.{js,mjs,cjs}"],
     plugins: { js, jsdoc, noSecrets },
     extends: ["js/recommended"],
-    ignores: ["eslint.config.mjs"],
+    ignores: ["eslint.config.mjs", "**/node_modules/**", "scripts/**", ".husky/**", ".vscode/**", ".vscode/settings.json", "tests/**"],
     languageOptions: {
       sourceType: "commonjs",
       globals: {
