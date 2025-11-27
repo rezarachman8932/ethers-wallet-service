@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "mocha --exit tests/*",
-    "start": "nodemon bin/www",
+    "start": "node migrate.js && nodemon bin/www",
     "db:migrate": "sequelize db:migrate",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
