@@ -3,7 +3,7 @@
 Install kc-wallet-svc with npm
 
 ```bash
-  npm install
+  npm install && npm run prepare
 ```
 
 Set .env file

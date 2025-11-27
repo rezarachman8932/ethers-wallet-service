@@ -11,8 +11,11 @@ WalletRouter.post('/balance', authMiddleware, WalletController.getWalletBalance)
 WalletRouter.post('/convert', authMiddleware, ConversionController.convertFiatToCrypto);
 WalletRouter.post('/transaction/history', authMiddleware, WalletController.getTransactionHistory);
 WalletRouter.post('/transaction/detail', authMiddleware, WalletController.getTransactionDetail);
-WalletRouter.post("/estimate", authMiddleware, WalletController.getGasEstimation);
-WalletRouter.get("/gas-price", authMiddleware, WalletController.getGasPrice);
-WalletRouter.post("/transfer", authMiddleware, WalletController.transfer);
+WalletRouter.post('/estimate', authMiddleware, WalletController.getGasEstimation);
+WalletRouter.get('/gas-price', authMiddleware, WalletController.getGasPrice);
+WalletRouter.post('/transfer', authMiddleware, WalletController.transfer);
+WalletRouter.get('/block/latest', authMiddleware, WalletController.getLatestBlock);
+WalletRouter.get('/block/hash', authMiddleware, WalletController.getBlockByHash);
+WalletRouter.get('/block/number', authMiddleware, WalletController.getBlockByNumber);
 
 module.exports = WalletRouter;

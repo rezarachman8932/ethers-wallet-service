@@ -4,7 +4,8 @@ const AUDIT_ACTION = require('../constants/auditAction.constant');
 const AuditrailService = require('../services/auditrail.service');
 const EthersService = require('../services/ethers.service');
 const HistoryService = require('../services/history.service');
-const { get } = require('lodash');
+
+const ethersService = require('../services/ethers.service');
 
 const createWallet = async (req, res) => {
   try {
@@ -111,7 +112,7 @@ const getWalletBalance = async (req, res) => {
     if (!address || !network) {
       return response.response.error(
         res,
-        "Missing address or network in the request body!",
+        'Missing address or network in the request body!',
         null,
         StatusCodes.BAD_REQUEST
       );
@@ -126,20 +127,16 @@ const getWalletBalance = async (req, res) => {
 
     const balanceData = await EthersService.getBalance(address, network);
 
-    return response.response.success(
-      res,
-      "Balance fetched successfully!",
-      balanceData
-    );
+    return response.response.success(res, 'Balance fetched successfully!', balanceData);
   } catch (error) {
     return response.response.error(
       res,
-      "Unable to fetch wallet balance!",
+      'Unable to fetch wallet balance!',
       error.message,
       StatusCodes.UNPROCESSABLE_ENTITY
     );
   }
-}
+};
 
 const getTransactionHistory = async (req, res) => {
   try {
@@ -147,7 +144,7 @@ const getTransactionHistory = async (req, res) => {
     if (!address || !network) {
       return response.response.error(
         res,
-        "Missing address or network in the request body!",
+        'Missing address or network in the request body!',
         null,
         StatusCodes.BAD_REQUEST
       );
@@ -162,15 +159,11 @@ const getTransactionHistory = async (req, res) => {
       ipAddress: req.ip,
     });
 
-    return response.response.success(
-      res,
-      "Transaction history fetched successfully!",
-      data
-    );
+    return response.response.success(res, 'Transaction history fetched successfully!', data);
   } catch (error) {
     return response.response.error(
       res,
-      "Failed to fetch transaction history!",
+      'Failed to fetch transaction history!',
       error.message,
       StatusCodes.UNPROCESSABLE_ENTITY
     );
@@ -183,7 +176,7 @@ const getTransactionDetail = async (req, res) => {
     if (!txHash || !network) {
       return response.response.error(
         res,
-        "Missing txHash or network in the request body!",
+        'Missing txHash or network in the request body!',
         null,
         StatusCodes.BAD_REQUEST
       );
@@ -198,15 +191,11 @@ const getTransactionDetail = async (req, res) => {
       ipAddress: req.ip,
     });
 
-    return response.response.success(
-      res,
-      "Transaction detail fetched successfully!",
-      data
-    );
+    return response.response.success(res, 'Transaction detail fetched successfully!', data);
   } catch (error) {
     return response.response.error(
       res,
-      "Failed to fetch transaction detail!",
+      'Failed to fetch transaction detail!',
       error.message,
       StatusCodes.UNPROCESSABLE_ENTITY
     );
@@ -220,7 +209,7 @@ const getGasEstimation = async (req, res) => {
     if (!network || !contractAddress || !abi || !method || !from) {
       return response.response.error(
         res,
-        "Missing required fields (network, contractAddress, abi, method, from)!",
+        'Missing required fields (network, contractAddress, abi, method, from)!',
         null,
         StatusCodes.BAD_REQUEST
       );
@@ -233,7 +222,7 @@ const getGasEstimation = async (req, res) => {
       method,
       params,
       from,
-      value
+      value,
     });
 
     await AuditrailService.create({
@@ -243,15 +232,11 @@ const getGasEstimation = async (req, res) => {
       ipAddress: req.ip,
     });
 
-    return response.response.success(
-      res,
-      "Estimation cost  fetched successfully!",
-      gas
-    );
+    return response.response.success(res, 'Estimation cost  fetched successfully!', gas);
   } catch (error) {
     return response.response.error(
       res,
-      "Failed to get the estimation cost!",
+      'Failed to get the estimation cost!',
       error.message,
       StatusCodes.UNPROCESSABLE_ENTITY
     );
@@ -264,7 +249,7 @@ const getGasPrice = async (req, res) => {
     if (!network) {
       return response.response.error(
         res,
-        "Query param network is required!",
+        'Query param network is required!',
         null,
         StatusCodes.BAD_REQUEST
       );
@@ -279,15 +264,11 @@ const getGasPrice = async (req, res) => {
       ipAddress: req.ip,
     });
 
-    return response.response.success(
-      res,
-      "Gas price fetched successfully!",
-      result
-    );
+    return response.response.success(res, 'Gas price fetched successfully!', result);
   } catch (error) {
     return response.response.error(
       res,
-      "Failed to get gas price!",
+      'Failed to get gas price!',
       error.message,
       StatusCodes.UNPROCESSABLE_ENTITY
     );
@@ -301,13 +282,13 @@ const transfer = async (req, res) => {
     if (!network || !to || !amount || !privateKey) {
       return response.response.error(
         res,
-        "Missing required fields!",
+        'Missing required fields!',
         null,
         StatusCodes.BAD_REQUEST
       );
     }
 
-    const result = await EthersService.transferNativeToken({ 
+    const result = await EthersService.transferNativeToken({
       network,
       to,
       amount,
@@ -321,15 +302,107 @@ const transfer = async (req, res) => {
       ipAddress: req.ip,
     });
 
-    return response.response.success(
-      res,
-      "Balance transferred successfully!",
-      result
-    );
+    return response.response.success(res, 'Balance transferred successfully!', result);
   } catch (error) {
     return response.response.error(
       res,
-      "Transfer balance failed",
+      'Transfer balance failed',
+      error.message,
+      StatusCodes.UNPROCESSABLE_ENTITY
+    );
+  }
+};
+
+const getLatestBlock = async (req, res) => {
+  try {
+    const { network } = req.query;
+    if (!network) {
+      return response.response.error(
+        res,
+        "Query parameter of 'network' is required!",
+        null,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    const result = await ethersService.getLatestBlock(network);
+
+    await AuditrailService.create({
+      action: AUDIT_ACTION.GET_LATEST_BLOCK,
+      header: req.headers,
+      body: req.body,
+      ipAddress: req.ip,
+    });
+
+    return response.response.success(res, 'Latest block fetched successfully!', result);
+  } catch (error) {
+    return response.response.error(
+      res,
+      'Latest block failed to get!',
+      error.message,
+      StatusCodes.UNPROCESSABLE_ENTITY
+    );
+  }
+};
+
+const getBlockByHash = async (req, res) => {
+  try {
+    const { network, hash } = req.query;
+    if (!network || !hash) {
+      return response.response.error(
+        res,
+        "Query parameters of 'network' and 'hash' are required!",
+        null,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    const result = await ethersService.getBlockByHash({ network, hash });
+
+    await AuditrailService.create({
+      action: AUDIT_ACTION.GET_BLOCK_BY_HASH,
+      header: req.headers,
+      body: req.body,
+      ipAddress: req.ip,
+    });
+
+    return response.response.success(res, 'Block fetched by hash successfully!', result);
+  } catch (error) {
+    return response.response.error(
+      res,
+      'Block fetched by hash failed to get!',
+      error.message,
+      StatusCodes.UNPROCESSABLE_ENTITY
+    );
+  }
+};
+
+const getBlockByNumber = async (req, res) => {
+  try {
+    const { network, blockNumber } = req.query;
+    if (!network || !blockNumber) {
+      return response.response.error(
+        res,
+        "Query parameters of 'network' and 'blockNumber' are required!",
+        null,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    const result = await ethersService.getBlockByNumber({ network, blockNumber });
+
+    await AuditrailService.create({
+      action: AUDIT_ACTION.GET_BLOCK_BY_NUMBER,
+      header: req.headers,
+      body: req.body,
+      ipAddress: req.ip,
+    });
+
+    return response.response.success(res, 'Block fetched by number successfully!', result);
+  } catch (error) {
+    return response.response.error(
+      res,
+      'Block fetched by number failed to get!',
       error.message,
       StatusCodes.UNPROCESSABLE_ENTITY
     );
@@ -345,5 +418,8 @@ module.exports = {
   getTransactionDetail,
   getGasEstimation,
   getGasPrice,
-  transfer
-}
+  transfer,
+  getLatestBlock,
+  getBlockByHash,
+  getBlockByNumber,
+};
