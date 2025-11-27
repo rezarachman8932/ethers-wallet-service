@@ -75,7 +75,7 @@
     "signale": "^1.4.0",
     "tmp": "^0.2.5",
     "url-parse": "^1.5.10",
-    "uuid": "^13.0.0",
+    "uuid": "9.0.1",
     "web3": "^4.16.0",
     "web3-provider-engine": "^17.0.1",
     "web3-utils": "^4.3.3",
