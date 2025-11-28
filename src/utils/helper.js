@@ -68,6 +68,22 @@ const generatePlatformCredentials = () => {
   return { uuid, accessKey, token };
 };
 
+/**
+ * Generate Signature Key — hashed from body + accessKey
+ * @param {string} body - request body converted to string
+ * @param {string} accessKey - platform access key
+ * @returns {string} signatureKey
+ */
+const generateSignatureKey = (body, token) => {
+  const combined = `${JSON.stringify(body)}:${token}`;
+  return crypto.createHash('sha256').update(combined).digest('hex');
+};
+
+const verifySignature = (body, token, signatureToCheck) => {
+  const newSignature = generateSignatureKey(body, token);
+  return newSignature === signatureToCheck;
+};
+
 module.exports = {
   isValidAddress,
   isValidCertificateHash,
@@ -80,4 +96,6 @@ module.exports = {
   compareBcryptHash,
   generateToken,
   generatePlatformCredentials,
+  generateSignatureKey,
+  verifySignature,
 };

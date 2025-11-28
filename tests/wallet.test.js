@@ -2,28 +2,29 @@ const request = require('supertest');
 const assert = require('assert');
 const app = require('../src/server');
 const { sequelize } = require('../src/databases/models');
-const { generatePlatformCredentials } = require('../src/utils/helper');
+const { generateToken, generateSignatureKey } = require('../src/utils/helper');
 const models = require('../src/databases/models');
 const { time } = require('console');
 const Platform = models.Platform;
 const Auditrail = models.Auditrail;
 
 describe('POST /api/v1/wallet', () => {
-  let validAccessKey, validToken;
+  let validAccessKey, validToken, platformUuid, platformAccessKey, token;
 
   before(async function () {
     this.timeout(3000);
 
-    const { uuid, accessKey, token } = generatePlatformCredentials();
     const platform = await Platform.create({
-      uuid,
       name: 'Wallet Test New Reza',
-      token,
-      accessKey,
+      description: 'Test description for wallet',
     });
-
-    validAccessKey = platform.accessKey;
-    validToken = platform.token;
+    platformUuid = platform.uuid;
+    platformAccessKey = platform.accessKey;
+    token = generateToken(platformUuid, platformAccessKey);
+    const body = {};
+    const signatureKey = generateSignatureKey(body, token);
+    validAccessKey = platformAccessKey;
+    validToken = signatureKey;
   });
 
   after(async () => {
@@ -72,13 +73,14 @@ describe('POST /api/v1/wallet', () => {
 
   it('should return wallet data from private key successfully', async () => {
     const privateKey = '0x4c0883a6910395b8b6a1237e9c31c7b03cbe0b5c7f8d9a8c2a66c475f8c6f0a9';
-
+    const body = { privateKey };
+    const signatureKey = generateSignatureKey(body, token);
     const res = await request(app)
       .post('/api/v1/wallet/private')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`)
-      .send({ privateKey });
+      .set('authorization', `Bearer ${signatureKey}`)
+      .send(body);
 
     assert.equal(res.status, 200);
     assert.equal(res.body.message, 'Wallet retrieved successfully from private key!');
@@ -97,11 +99,13 @@ describe('POST /api/v1/wallet', () => {
   });
 
   it('should return 400 if private key missing', async () => {
+    const body = {};
+    const signatureKey = generateSignatureKey(body, token);
     const res = await request(app)
       .post('/api/v1/wallet/private')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`)
-      .send({});
+      .set('authorization', `Bearer ${signatureKey}`)
+      .send(body);
 
     assert.equal(res.status, 400);
     assert.ok(res.body.message.includes('Missing private key in the request body!'));
@@ -109,13 +113,14 @@ describe('POST /api/v1/wallet', () => {
 
   it('should return wallet data from mnemonic successfully', async () => {
     const mnemonic = 'test test test test test test test test test test test junk';
-
+    const body = { mnemonic };
+    const signatureKey = generateSignatureKey(body, token);
     const res = await request(app)
       .post('/api/v1/wallet/mnemonic')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`)
-      .send({ mnemonic });
+      .set('authorization', `Bearer ${signatureKey}`)
+      .send(body);
 
     assert.equal(res.status, 200);
     assert.equal(res.body.message, 'Wallet retrieved successfully from mnemonic!');
@@ -134,11 +139,13 @@ describe('POST /api/v1/wallet', () => {
   });
 
   it('should return 400 if mnemonic missing', async () => {
+    const body = {};
+    const signatureKey = generateSignatureKey(body, token);
     const res = await request(app)
       .post('/api/v1/wallet/mnemonic')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`)
-      .send({});
+      .set('authorization', `Bearer ${signatureKey}`)
+      .send(body);
 
     assert.equal(res.status, 400);
     assert.ok(res.body.message.includes('Missing mnemonic in the request body!'));
@@ -148,24 +155,29 @@ describe('POST /api/v1/wallet', () => {
     const address = '0x742d35Cc6634C0532925a3b844Bc454e4438f44e';
     const network = 'ethereum';
 
+    const body = { address, network };
+    const signatureKey = generateSignatureKey(body, token);
+
     const res = await request(app)
       .post('/api/v1/wallet/balance')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`)
-      .send({ address, network });
+      .set('authorization', `Bearer ${signatureKey}`)
+      .send(body);
 
     assert.equal(res.status, 200);
     assert.equal(res.body.message, 'Balance fetched successfully!');
   });
 
   it('should fail when address or network is missing', async () => {
+    const body = { address: '' };
+    const signatureKey = generateSignatureKey(body, token);
     const res = await request(app)
       .post('/api/v1/wallet/balance')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`)
-      .send({ address: '' });
+      .set('authorization', `Bearer ${signatureKey}`)
+      .send(body);
 
     assert.equal(res.status, 400);
     assert.ok(res.body.message.includes('Missing address or network in the request body!'));
@@ -176,13 +188,14 @@ describe('POST /api/v1/wallet', () => {
 
     const txHash = '0x3384291afad5486985d0d79be408b0dc1bfa6b703ae728135ff57038c524dd1d';
     const network = 'polygon';
-
+    const body = { txHash, network };
+    const signatureKey = generateSignatureKey(body, token);
     const res = await request(app)
       .post('/api/v1/wallet/transaction/detail')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('Authorization', 'Bearer ' + validToken)
-      .send({ txHash, network });
+      .set('Authorization', 'Bearer ' + signatureKey)
+      .send(body);
 
     assert.equal(res.status, 200);
     assert.equal(res.body.message, 'Transaction detail fetched successfully!');
@@ -200,12 +213,14 @@ describe('POST /api/v1/wallet', () => {
   });
 
   it('should return 400 when txHash or network is missing', async () => {
+    const body = { txHash: '' };
+    const signatureKey = generateSignatureKey(body, token);
     const res = await request(app)
       .post('/api/v1/wallet/transaction/detail')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', 'Bearer ' + validToken)
-      .send({ txHash: '' });
+      .set('authorization', 'Bearer ' + signatureKey)
+      .send(body);
 
     assert.equal(res.status, 400);
     assert.ok(res.body.message.includes('Missing txHash or network in the request body!'));
@@ -214,13 +229,15 @@ describe('POST /api/v1/wallet', () => {
   it('should fetch transaction history successfully for a valid address and network', async () => {
     const address = '0x77af86669adfab004041c8ef0aa80a68ea1770e4';
     const network = 'polygon';
+    const body = { address, network };
+    const signatureKey = generateSignatureKey(body, token);
 
     const res = await request(app)
       .post('/api/v1/wallet/transaction/history')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', 'Bearer ' + validToken)
-      .send({ address, network });
+      .set('authorization', 'Bearer ' + signatureKey)
+      .send(body);
 
     assert.equal(res.status, 200);
     assert.equal(res.body.message, 'Transaction history fetched successfully!');
@@ -237,12 +254,15 @@ describe('POST /api/v1/wallet', () => {
   });
 
   it('should return 400 when address or network missing for transaction history', async () => {
+    const body = { address: '' };
+    const signatureKey = generateSignatureKey(body, token);
+
     const res = await request(app)
       .post('/api/v1/wallet/transaction/history')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', 'Bearer ' + validToken)
-      .send({ address: '' });
+      .set('authorization', 'Bearer ' + signatureKey)
+      .send(body);
 
     assert.equal(res.status, 400);
     assert.ok(res.body.message.includes('Missing address or network in the request body!'));
@@ -252,13 +272,15 @@ describe('POST /api/v1/wallet', () => {
     const fiatCurrency = 'SGD';
     const cryptoSymbol = 'ETH';
     const amount = 1000;
+    const body = { fiatCurrency, cryptoSymbol, amount };
+    const signatureKey = generateSignatureKey(body, token);
 
     const res = await request(app)
       .post('/api/v1/wallet/convert')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`)
-      .send({ fiatCurrency, cryptoSymbol, amount });
+      .set('authorization', `Bearer ${signatureKey}`)
+      .send(body);
 
     assert.equal(res.status, 200);
     assert.equal(res.body.message, 'Conversion succeed!');
@@ -268,13 +290,15 @@ describe('POST /api/v1/wallet', () => {
     const fiatCurrency = 'IDR';
     const cryptoSymbol = 'POL';
     const amount = 1000;
+    const body = { fiatCurrency, cryptoSymbol, amount };
+    const signatureKey = generateSignatureKey(body, token);
 
     const res = await request(app)
       .post('/api/v1/wallet/convert')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`)
-      .send({ fiatCurrency, cryptoSymbol, amount });
+      .set('authorization', `Bearer ${signatureKey}`)
+      .send(body);
 
     assert.equal(res.status, 200);
     assert.equal(res.body.message, 'Conversion succeed!');
@@ -283,13 +307,14 @@ describe('POST /api/v1/wallet', () => {
   it('should fail when one of the body request is missing', async () => {
     const fiatCurrency = 'IDR';
     const cryptoSymbol = 'POL';
-
+    const body = { fiatCurrency, cryptoSymbol };
+    const signatureKey = generateSignatureKey(body, token);
     const res = await request(app)
       .post('/api/v1/wallet/convert')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`)
-      .send({ fiatCurrency, cryptoSymbol });
+      .set('authorization', `Bearer ${signatureKey}`)
+      .send(body);
 
     assert.equal(res.status, 400);
     assert.ok(res.body.message.includes('Missing amount, fiatCurrency or cryptoSymbol!'));
@@ -305,11 +330,13 @@ describe('POST /api/v1/wallet', () => {
       from: '0x732874c027304f60a0561631cD615C34D82965a9',
     };
 
+    const signatureKey = generateSignatureKey(payload, validToken);
+
     const res = await request(app)
       .post('/api/v1/wallet/estimate')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`)
+      .set('authorization', `Bearer ${signatureKey}`)
       .send(payload);
 
     assert.equal(res.status, 200);
@@ -335,11 +362,13 @@ describe('POST /api/v1/wallet', () => {
       from: '0x732874c027304f60a0561631cD615C34D82965a9',
     };
 
+    const signatureKey = generateSignatureKey(payload, validToken);
+
     const res = await request(app)
       .post('/api/v1/wallet/estimate')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`)
+      .set('authorization', `Bearer ${signatureKey}`)
       .send(payload);
 
     assert.equal(res.status, 200);
@@ -348,12 +377,15 @@ describe('POST /api/v1/wallet', () => {
   });
 
   it('should return 400 when required fields are missing', async () => {
+    const body = {};
+    const signatureKey = generateSignatureKey(body, token);
+
     const res = await request(app)
       .post('/api/v1/wallet/estimate')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`)
-      .send({});
+      .set('authorization', `Bearer ${signatureKey}`)
+      .send(body);
 
     assert.equal(res.status, 400);
     assert.ok(
@@ -364,11 +396,13 @@ describe('POST /api/v1/wallet', () => {
   });
 
   it('should return gas price for Ethereum', async () => {
+    const signatureKey = generateSignatureKey({}, validToken);
+
     const res = await request(app)
       .get('/api/v1/wallet/gas-price?network=ethereum')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`);
+      .set('authorization', `Bearer ${signatureKey}`);
 
     assert.equal(res.status, 200);
     assert.equal(res.body.data.network, 'ethereum');
@@ -379,11 +413,13 @@ describe('POST /api/v1/wallet', () => {
   it('should return gas price for Polygon', async function () {
     this.timeout(5000);
 
+    const signatureKey = generateSignatureKey({}, validToken);
+
     const res = await request(app)
       .get('/api/v1/wallet/gas-price?network=polygon')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`);
+      .set('authorization', `Bearer ${signatureKey}`);
 
     assert.equal(res.status, 200);
     assert.equal(res.body.data.network, 'polygon');
@@ -392,11 +428,12 @@ describe('POST /api/v1/wallet', () => {
   });
 
   it('should return 400 if network parameter is missing', async () => {
+    const signatureKey = generateSignatureKey({}, validToken);
     const res = await request(app)
       .get('/api/v1/wallet/gas-price')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`);
+      .set('authorization', `Bearer ${signatureKey}`);
 
     assert.equal(res.status, 400);
     assert.ok(res.body.message.includes('Query param network is required!'));
@@ -409,12 +446,13 @@ describe('POST /api/v1/wallet', () => {
       amount: '0.0001',
       privateKey: '0x1b3d9046d5de649e6460e5c2e13de084bb4623d5025733d3eb73bdbae48c7298',
     };
+    const signatureKey = generateSignatureKey(body, token);
 
     const res = await request(app)
       .post('/api/v1/wallet/transfer')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`)
+      .set('authorization', `Bearer ${signatureKey}`)
       .send(body);
 
     assert.equal(res.status, 200);
@@ -433,12 +471,12 @@ describe('POST /api/v1/wallet', () => {
 
   it('should fetch the latest block successfully', async () => {
     const network = 'ethereum';
-
+    const signatureKey = generateSignatureKey({ network }, validToken);
     const res = await request(app)
       .get('/api/v1/wallet/block/latest')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`)
+      .set('authorization', `Bearer ${signatureKey}`)
       .query({ network });
 
     assert.equal(res.status, 200);
@@ -448,11 +486,12 @@ describe('POST /api/v1/wallet', () => {
   });
 
   it('should return 400 when network missing for latest block', async () => {
+    const signatureKey = generateSignatureKey({}, validToken);
     const res = await request(app)
       .get('/api/v1/wallet/block/latest')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`);
+      .set('authorization', `Bearer ${signatureKey}`);
 
     assert.equal(res.status, 400);
     assert.ok(res.body.message.includes("Query parameter of 'network' is required!"));
@@ -461,12 +500,12 @@ describe('POST /api/v1/wallet', () => {
   it('should fetch the latest block successfully', async () => {
     const network = 'polygon';
     const hash = '0x3b95830c8752b3138142e89e720c6106acf4d6e0bd486354df6c095b6f0d36a5';
-
+    const signatureKey = generateSignatureKey({ network, hash }, validToken);
     const res = await request(app)
       .get('/api/v1/wallet/block/hash')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`)
+      .set('authorization', `Bearer ${signatureKey}`)
       .query({ network, hash });
 
     assert.equal(res.status, 200);
@@ -478,12 +517,12 @@ describe('POST /api/v1/wallet', () => {
   it('should fetch the latest block successfully', async () => {
     const network = 'polygon';
     const blockNumber = '72551865';
-
+    const signatureKey = generateSignatureKey({ network, blockNumber }, validToken);
     const res = await request(app)
       .get('/api/v1/wallet/block/number')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`)
+      .set('authorization', `Bearer ${signatureKey}`)
       .query({ network, blockNumber });
 
     assert.equal(res.status, 200);

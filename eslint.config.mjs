@@ -12,7 +12,7 @@ export default defineConfig([
     files: ["**/*.{js,mjs,cjs}"],
     plugins: { js, jsdoc, noSecrets },
     extends: ["js/recommended"],
-    ignores: ["eslint.config.mjs", "**/node_modules/**", "scripts/**", ".husky/**", ".vscode/**", ".vscode/settings.json", "tests/**"],
+    ignores: ["eslint.config.mjs", "**/node_modules/**", "scripts/**", ".husky/**", ".vscode/**", ".vscode/settings.json", "tests/**", "bin/**", "migrate.js"],
     languageOptions: {
       sourceType: "commonjs",
       globals: {
@@ -61,7 +61,7 @@ export default defineConfig([
     }
   },
   {
-    files: ["tests/*.test.js"], 
+    files: ["tests/*.test.js","bin/*.js"], 
     rules: {
       "no-console": "off",
       "no-unused-vars": "off" ,

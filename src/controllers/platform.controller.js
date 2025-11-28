@@ -3,7 +3,6 @@ const AuditrailService = require('../services/auditrail.service');
 const AUDIT_ACTION = require('../constants/auditAction.constant');
 const response = require('../utils/response');
 const { StatusCodes } = require('http-status-codes');
-const { generatePlatformCredentials } = require('../utils/helper');
 const { Platform } = require('../databases/models');
 
 const getPlatform = async (req, res) => {
@@ -30,14 +29,9 @@ const createPlatform = async (req, res) => {
         StatusCodes.BAD_REQUEST
       );
 
-    const { uuid, accessKey, token } = generatePlatformCredentials();
-
     const newPlatform = await Platform.create({
-      uuid,
       name,
       description,
-      accessKey,
-      token,
     });
 
     await AuditrailService.create({

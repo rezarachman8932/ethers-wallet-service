@@ -2,20 +2,28 @@ const express = require('express');
 const WalletRouter = new express.Router();
 const WalletController = require('../controllers/wallet.controller');
 const ConversionController = require('../controllers/conversion.controller');
-const { authMiddleware } = require('../middlewares/app.middleware');
+const { authVerifyMiddleware } = require('../middlewares/app.middleware');
 
-WalletRouter.post('/', authMiddleware, WalletController.createWallet);
-WalletRouter.post('/private', authMiddleware, WalletController.getWalletByPrivateKey);
-WalletRouter.post('/mnemonic', authMiddleware, WalletController.getWalletByMnemonic);
-WalletRouter.post('/balance', authMiddleware, WalletController.getWalletBalance);
-WalletRouter.post('/convert', authMiddleware, ConversionController.convertFiatToCrypto);
-WalletRouter.post('/transaction/history', authMiddleware, WalletController.getTransactionHistory);
-WalletRouter.post('/transaction/detail', authMiddleware, WalletController.getTransactionDetail);
-WalletRouter.post('/estimate', authMiddleware, WalletController.getGasEstimation);
-WalletRouter.get('/gas-price', authMiddleware, WalletController.getGasPrice);
-WalletRouter.post('/transfer', authMiddleware, WalletController.transfer);
-WalletRouter.get('/block/latest', authMiddleware, WalletController.getLatestBlock);
-WalletRouter.get('/block/hash', authMiddleware, WalletController.getBlockByHash);
-WalletRouter.get('/block/number', authMiddleware, WalletController.getBlockByNumber);
+WalletRouter.post('/', authVerifyMiddleware, WalletController.createWallet);
+WalletRouter.post('/private', authVerifyMiddleware, WalletController.getWalletByPrivateKey);
+WalletRouter.post('/mnemonic', authVerifyMiddleware, WalletController.getWalletByMnemonic);
+WalletRouter.post('/balance', authVerifyMiddleware, WalletController.getWalletBalance);
+WalletRouter.post('/convert', authVerifyMiddleware, ConversionController.convertFiatToCrypto);
+WalletRouter.post(
+  '/transaction/history',
+  authVerifyMiddleware,
+  WalletController.getTransactionHistory
+);
+WalletRouter.post(
+  '/transaction/detail',
+  authVerifyMiddleware,
+  WalletController.getTransactionDetail
+);
+WalletRouter.post('/estimate', authVerifyMiddleware, WalletController.getGasEstimation);
+WalletRouter.get('/gas-price', authVerifyMiddleware, WalletController.getGasPrice);
+WalletRouter.post('/transfer', authVerifyMiddleware, WalletController.transfer);
+WalletRouter.get('/block/latest', authVerifyMiddleware, WalletController.getLatestBlock);
+WalletRouter.get('/block/hash', authVerifyMiddleware, WalletController.getBlockByHash);
+WalletRouter.get('/block/number', authVerifyMiddleware, WalletController.getBlockByNumber);
 
 module.exports = WalletRouter;

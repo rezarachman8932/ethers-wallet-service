@@ -7,11 +7,10 @@ const models = require('../src/databases/models');
 const Platform = models.Platform;
 const Auditrail = models.Auditrail;
 const crypto = require('crypto');
-const { generatePlatformCredentials } = require('../src/utils/helper');
-const { generateToken } = require('../src/utils/helper');
+const { generateToken, generateSignatureKey, verifySignature } = require('../src/utils/helper');
 
 describe('GET /api/v1/platform', () => {
-  let validAccessKey, validToken;
+  let validAccessKey, validToken, previousUUID, previousAccessKey;
 
   before(async function () {
     this.timeout(10000);
@@ -22,36 +21,31 @@ describe('GET /api/v1/platform', () => {
       execSync('npx sequelize-cli db:migrate', { stdio: 'inherit' });
     }
 
-    // Generate platform credentials
-    const { uuid, accessKey, token } = generatePlatformCredentials();
-
-    previousUUID = uuid;
-    previousAccessKey = accessKey;
-
     // Seed the Platform
     const platform = await Platform.create({
-      uuid,
       name: 'Sample Platform',
       description: 'Test description',
-      token,
-      accessKey,
     });
-
+    previousUUID = platform.uuid;
+    previousAccessKey = platform.accessKey;
     validAccessKey = platform.accessKey;
-    validToken = platform.token;
+    const token = generateToken(platform.uuid, validAccessKey);
+    validToken = token;
   });
 
   it('should return platform list and create an audit trail', async () => {
+    const body = {};
+    const signatureKey = generateSignatureKey(body, validToken);
+    console.log(`Bearer ${signatureKey}`);
     const res = await request(app)
       .get('/api/v1/platform')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`);
-
+      .set('authorization', `Bearer ${signatureKey}`);
     assert.equal(res.status, 200);
     assert.equal(res.type, 'application/json');
     assert.equal(res.body.message, 'Get platform successfully!');
-    assert.equal(generateToken(previousUUID, previousAccessKey), validToken);
+    assert.equal(verifySignature({}, validToken, signatureKey), true);
     assert.ok(Array.isArray(res.body.data));
     assert.equal(res.body.data.length, 1);
 
@@ -74,17 +68,18 @@ describe('GET /api/v1/platform', () => {
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
       .set('authorization', `Bearer ${wrongToken}`);
-
     assert.equal(res.status, 403);
-    assert.ok(res.body.message.includes('or auth token!'));
+    assert.ok(res.body.message.includes('Invalid signature!'));
   });
 
   it('should fail with 403 when access key not found', async () => {
+    const body = {};
+    const signatureKey = generateSignatureKey(body, validToken);
     const res = await request(app)
       .get('/api/v1/platform')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', 'non-existent-access-key')
-      .set('authorization', `Bearer ${validToken}`);
+      .set('authorization', `Bearer ${signatureKey}`);
 
     assert.equal(res.status, 403);
     assert.ok(res.body.message.includes('Invalid access key'));
