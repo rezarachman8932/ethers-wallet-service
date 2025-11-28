@@ -1,6 +1,7 @@
 'use strict';
-const { v4: uuidv4 } = require('uuid');
+
 const { Model } = require('sequelize');
+const { generatePlatformCredentials } = require('../../utils/helper');
 
 module.exports = (sequelize, DataTypes) => {
   class Platform extends Model {
@@ -45,6 +46,11 @@ module.exports = (sequelize, DataTypes) => {
       updatedAt: 'updatedAt',
     }
   );
-  Platform.beforeCreate((data) => (data.uuid = uuidv4()));
+  Platform.beforeCreate((data) => {
+    const { uuid, accessKey, token } = generatePlatformCredentials();
+    data.uuid = uuid;
+    data.accessKey = accessKey;
+    data.token = token;
+  });
   return Platform;
 };

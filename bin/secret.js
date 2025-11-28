@@ -4,7 +4,6 @@ require('dotenv').config();
 
 const getGoogleSecret = async () => {
   if (process.env.GCLOUDENV) {
-    // eslint-disable-next-line no-console
     console.log('attempting to load secrets');
 
     try {
@@ -30,7 +29,7 @@ const getGoogleSecret = async () => {
         const secretPayload = version.payload.data.toString('utf8');
         const envVars = JSON.parse(secretPayload);
         Object.assign(process.env, envVars[process.env.SM_ENV] || 'dev');
-        // eslint-disable-next-line no-console
+
         console.log('loaded secrets');
         console.log('secret manager env:', process.env.SM_ENV);
         console.log(process.env.NODE_PORT);
