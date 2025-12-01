@@ -4,7 +4,6 @@ const app = require('../src/server');
 const { sequelize } = require('../src/databases/models');
 const { generateToken, generateSignatureKey } = require('../src/utils/helper');
 const models = require('../src/databases/models');
-const { delay } = require('lodash');
 const Platform = models.Platform;
 const Auditrail = models.Auditrail;
 
