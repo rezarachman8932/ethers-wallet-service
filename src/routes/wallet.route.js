@@ -30,5 +30,10 @@ WalletRouter.post(
   authVerifyMiddleware,
   WalletController.estimateCostForTransferBalance
 );
+WalletRouter.get(
+  '/block/transactions',
+  authVerifyMiddleware,
+  WalletController.getBlockWithTransactions
+);
 
 module.exports = WalletRouter;
