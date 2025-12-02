@@ -187,6 +187,38 @@ class EthersServices {
       throw new Error(error.message || 'Failed to fetch block by number');
     }
   }
+
+  async estimateGasForTransfer({ network, to, amount, privateKey }) {
+    try {
+      const rpcUrl = networkHelper.getRpcUrl(network);
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+
+      const wallet = new ethers.Wallet(privateKey, provider);
+      const value = ethers.parseEther(amount.toString());
+
+      const gasLimit = await provider.estimateGas({
+        to: to,
+        value: value,
+        from: wallet.address,
+      });
+
+      const feeData = await provider.getFeeData();
+      const gasPrice = feeData.gasPrice;
+      if (!gasPrice) throw new Error('Unable to get the gas price!');
+
+      const totalGasWei = gasLimit * gasPrice;
+      const totalGasEth = ethers.formatEther(totalGasWei);
+
+      return {
+        gasLimit: gasLimit.toString(),
+        gasPrice: gasPrice.toString(),
+        totalGasWei: totalGasWei.toString(),
+        totalGasEth: totalGasEth,
+      };
+    } catch (error) {
+      throw new Error(error.message || 'Failed to estimate cost for transfer balance!');
+    }
+  }
 }
 
 module.exports = new EthersServices();

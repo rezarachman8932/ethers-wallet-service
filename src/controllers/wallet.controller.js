@@ -409,6 +409,48 @@ const getBlockByNumber = async (req, res) => {
   }
 };
 
+const estimateCostForTransferBalance = async (req, res) => {
+  try {
+    const { network, to, amount, privateKey } = req.body;
+
+    if (!network || !to || !amount || !privateKey) {
+      return response.response.error(
+        res,
+        'Missing required fields!',
+        null,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    const result = await EthersService.estimateGasForTransfer({
+      network,
+      to,
+      amount,
+      privateKey,
+    });
+
+    await AuditrailService.create({
+      action: AUDIT_ACTION.GET_ESTIMATION_COST_TRANSFER_BALANCE,
+      header: req.headers,
+      body: req.body,
+      ipAddress: req.ip,
+    });
+
+    return response.response.success(
+      res,
+      'Estimation cost for transfer balance fetched successfully!',
+      result
+    );
+  } catch (error) {
+    return response.response.error(
+      res,
+      'Estimation cost for transfer balance failed to get!',
+      error.message,
+      StatusCodes.UNPROCESSABLE_ENTITY
+    );
+  }
+};
+
 module.exports = {
   createWallet,
   getWalletByPrivateKey,
@@ -422,4 +464,5 @@ module.exports = {
   getLatestBlock,
   getBlockByHash,
   getBlockByNumber,
+  estimateCostForTransferBalance,
 };

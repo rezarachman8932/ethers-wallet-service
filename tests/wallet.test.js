@@ -4,12 +4,11 @@ const app = require('../src/server');
 const { sequelize } = require('../src/databases/models');
 const { generateToken, generateSignatureKey } = require('../src/utils/helper');
 const models = require('../src/databases/models');
-const { time } = require('console');
 const Platform = models.Platform;
 const Auditrail = models.Auditrail;
 
 describe('POST /api/v1/wallet', () => {
-  let validAccessKey, validToken, platformUuid, platformAccessKey, token;
+  let validAccessKey, validSignatureKey, platformUuid, platformAccessKey, token;
 
   before(async function () {
     this.timeout(3000);
@@ -18,13 +17,16 @@ describe('POST /api/v1/wallet', () => {
       name: 'Wallet Test New Reza',
       description: 'Test description for wallet',
     });
+
     platformUuid = platform.uuid;
     platformAccessKey = platform.accessKey;
     token = generateToken(platformUuid, platformAccessKey);
+
     const body = {};
     const signatureKey = generateSignatureKey(body, token);
+
     validAccessKey = platformAccessKey;
-    validToken = signatureKey;
+    validSignatureKey = signatureKey;
   });
 
   after(async () => {
@@ -53,7 +55,7 @@ describe('POST /api/v1/wallet', () => {
       .post('/api/v1/wallet')
       .set('Accept', 'application/json')
       .set('x-wallet-access-key', validAccessKey)
-      .set('authorization', `Bearer ${validToken}`);
+      .set('authorization', `Bearer ${validSignatureKey}`);
 
     assert.equal(res.status, 201);
     assert.equal(res.body.message, 'New wallet created successfully!');
@@ -151,7 +153,9 @@ describe('POST /api/v1/wallet', () => {
     assert.ok(res.body.message.includes('Missing mnemonic in the request body!'));
   });
 
-  it('should fetch balance successfully for a valid address and network', async () => {
+  it('should fetch balance successfully for a valid address and network', async function () {
+    this.timeout(2000);
+
     const address = '0x742d35Cc6634C0532925a3b844Bc454e4438f44e';
     const network = 'ethereum';
 
@@ -268,7 +272,9 @@ describe('POST /api/v1/wallet', () => {
     assert.ok(res.body.message.includes('Missing address or network in the request body!'));
   });
 
-  it('should convert from Fiat to ETH (from SGD)', async () => {
+  it('should convert from Fiat to ETH (from SGD)', async function () {
+    this.timeout(2000);
+
     const fiatCurrency = 'SGD';
     const cryptoSymbol = 'ETH';
     const amount = 1000;
@@ -286,7 +292,9 @@ describe('POST /api/v1/wallet', () => {
     assert.equal(res.body.message, 'Conversion succeed!');
   });
 
-  it('should convert from Fiat to POL (from IDR)', async () => {
+  it('should convert from Fiat to POL (from IDR)', async function () {
+    this.timeout(2000);
+
     const fiatCurrency = 'IDR';
     const cryptoSymbol = 'POL';
     const amount = 1000;
@@ -330,7 +338,7 @@ describe('POST /api/v1/wallet', () => {
       from: '0x732874c027304f60a0561631cD615C34D82965a9',
     };
 
-    const signatureKey = generateSignatureKey(payload, validToken);
+    const signatureKey = generateSignatureKey(payload, token);
 
     const res = await request(app)
       .post('/api/v1/wallet/estimate')
@@ -362,7 +370,7 @@ describe('POST /api/v1/wallet', () => {
       from: '0x732874c027304f60a0561631cD615C34D82965a9',
     };
 
-    const signatureKey = generateSignatureKey(payload, validToken);
+    const signatureKey = generateSignatureKey(payload, token);
 
     const res = await request(app)
       .post('/api/v1/wallet/estimate')
@@ -396,7 +404,7 @@ describe('POST /api/v1/wallet', () => {
   });
 
   it('should return gas price for Ethereum', async () => {
-    const signatureKey = generateSignatureKey({}, validToken);
+    const signatureKey = generateSignatureKey({}, token);
 
     const res = await request(app)
       .get('/api/v1/wallet/gas-price?network=ethereum')
@@ -413,7 +421,7 @@ describe('POST /api/v1/wallet', () => {
   it('should return gas price for Polygon', async function () {
     this.timeout(5000);
 
-    const signatureKey = generateSignatureKey({}, validToken);
+    const signatureKey = generateSignatureKey({}, token);
 
     const res = await request(app)
       .get('/api/v1/wallet/gas-price?network=polygon')
@@ -428,7 +436,7 @@ describe('POST /api/v1/wallet', () => {
   });
 
   it('should return 400 if network parameter is missing', async () => {
-    const signatureKey = generateSignatureKey({}, validToken);
+    const signatureKey = generateSignatureKey({}, token);
     const res = await request(app)
       .get('/api/v1/wallet/gas-price')
       .set('Accept', 'application/json')
@@ -440,6 +448,8 @@ describe('POST /api/v1/wallet', () => {
   });
 
   it('should transfer native token successfully', async function () {
+    this.timeout(3000);
+
     const body = {
       network: 'sepolia',
       to: '0xead9277CD7Bf281806155089E82391b2B56AbB7b',
@@ -471,7 +481,7 @@ describe('POST /api/v1/wallet', () => {
 
   it('should fetch the latest block successfully', async () => {
     const network = 'ethereum';
-    const signatureKey = generateSignatureKey({ network }, validToken);
+    const signatureKey = generateSignatureKey({}, token);
     const res = await request(app)
       .get('/api/v1/wallet/block/latest')
       .set('Accept', 'application/json')
@@ -486,7 +496,7 @@ describe('POST /api/v1/wallet', () => {
   });
 
   it('should return 400 when network missing for latest block', async () => {
-    const signatureKey = generateSignatureKey({}, validToken);
+    const signatureKey = generateSignatureKey({}, token);
     const res = await request(app)
       .get('/api/v1/wallet/block/latest')
       .set('Accept', 'application/json')
@@ -497,10 +507,10 @@ describe('POST /api/v1/wallet', () => {
     assert.ok(res.body.message.includes("Query parameter of 'network' is required!"));
   });
 
-  it('should fetch the latest block successfully', async () => {
+  it('should fetch the block by hash successfully', async () => {
     const network = 'polygon';
     const hash = '0x3b95830c8752b3138142e89e720c6106acf4d6e0bd486354df6c095b6f0d36a5';
-    const signatureKey = generateSignatureKey({ network, hash }, validToken);
+    const signatureKey = generateSignatureKey({}, token);
     const res = await request(app)
       .get('/api/v1/wallet/block/hash')
       .set('Accept', 'application/json')
@@ -514,10 +524,10 @@ describe('POST /api/v1/wallet', () => {
     assert.ok(res.body.data.block.number >= 0);
   });
 
-  it('should fetch the latest block successfully', async () => {
+  it('should fetch the block by number successfully', async () => {
     const network = 'polygon';
     const blockNumber = '72551865';
-    const signatureKey = generateSignatureKey({ network, blockNumber }, validToken);
+    const signatureKey = generateSignatureKey({}, token);
     const res = await request(app)
       .get('/api/v1/wallet/block/number')
       .set('Accept', 'application/json')
@@ -529,5 +539,34 @@ describe('POST /api/v1/wallet', () => {
     assert.equal(res.body.message, 'Block fetched by number successfully!');
     assert.ok(res.body.data.block);
     assert.ok(res.body.data.block.number >= 0);
+  });
+
+  it('should get the estimation cost for transfer balance successfully', async function () {
+    const body = {
+      network: 'sepolia',
+      to: '0xead9277CD7Bf281806155089E82391b2B56AbB7b',
+      amount: '0.0001',
+      privateKey: '0x1b3d9046d5de649e6460e5c2e13de084bb4623d5025733d3eb73bdbae48c7298',
+    };
+
+    const signatureKey = generateSignatureKey(body, token);
+
+    const res = await request(app)
+      .post('/api/v1/wallet/estimate/gas')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${signatureKey}`)
+      .send(body);
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.message, 'Estimation cost for transfer balance fetched successfully!');
+
+    const count = await Auditrail.count();
+    const lastRecord = await Auditrail.findOne({
+      offset: count - 1,
+      order: [['id', 'ASC']],
+    });
+
+    assert.equal(lastRecord.action, 'GET_ESTIMATION_COST_TRANSFER_BALANCE');
   });
 });

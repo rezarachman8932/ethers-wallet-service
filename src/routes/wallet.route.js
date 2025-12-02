@@ -25,5 +25,10 @@ WalletRouter.post('/transfer', authVerifyMiddleware, WalletController.transfer);
 WalletRouter.get('/block/latest', authVerifyMiddleware, WalletController.getLatestBlock);
 WalletRouter.get('/block/hash', authVerifyMiddleware, WalletController.getBlockByHash);
 WalletRouter.get('/block/number', authVerifyMiddleware, WalletController.getBlockByNumber);
+WalletRouter.post(
+  '/estimate/gas',
+  authVerifyMiddleware,
+  WalletController.estimateCostForTransferBalance
+);
 
 module.exports = WalletRouter;
