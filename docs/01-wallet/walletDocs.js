@@ -133,9 +133,9 @@
  * @swagger
  * /api/v1/wallet/balance:
  *   post:
- *     summary: Create a new wallet using mnemonic
+ *     summary: get balance
  *     tags: [Wallet]
- *     description: This endpoint create wallet address using mnemonic
+ *     description: This endpoint get balance wallet address
  *     security:
  *       - AccessKeyAuth: []
  *       - BearerAuth: []
