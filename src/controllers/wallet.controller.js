@@ -453,12 +453,12 @@ const estimateCostForTransferBalance = async (req, res) => {
 
 const getBlockWithTransactions = async (req, res) => {
   try {
-    const { network, blockNumberOrHash } = req.query;
+    const { network, hash } = req.query;
 
-    if (!network || !blockNumberOrHash) {
+    if (!network || !hash) {
       return response.response.error(
         res,
-        "Query parameters of 'network' and 'blockNumberOrHash' are required!",
+        "Query parameters of 'network' and 'hash' are required!",
         null,
         StatusCodes.BAD_REQUEST
       );
@@ -466,7 +466,7 @@ const getBlockWithTransactions = async (req, res) => {
 
     const result = await ethersService.getBlockWithTransactions({
       network,
-      blockNumberOrHash,
+      hash,
     });
 
     await AuditrailService.create({

@@ -569,4 +569,29 @@ describe('POST /api/v1/wallet', () => {
 
     assert.equal(lastRecord.action, 'GET_ESTIMATION_COST_TRANSFER_BALANCE');
   });
+
+  it('should get block with transactions successfully', async function () {
+    const network = 'polygon';
+    const hash = '0x3b95830c8752b3138142e89e720c6106acf4d6e0bd486354df6c095b6f0d36a5';
+
+    const signatureKey = generateSignatureKey({}, token);
+
+    const res = await request(app)
+      .get('/api/v1/wallet/block/transactions')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${signatureKey}`)
+      .query({ network, hash });
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.message, 'Block with full transactions fetched successfully!');
+
+    const count = await Auditrail.count();
+    const lastRecord = await Auditrail.findOne({
+      offset: count - 1,
+      order: [['id', 'ASC']],
+    });
+
+    assert.equal(lastRecord.action, 'GET_BLOCK_WITH_TRANSACTIONS');
+  });
 });

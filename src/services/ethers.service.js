@@ -220,11 +220,11 @@ class EthersServices {
     }
   }
 
-  async getBlockWithTransactions({ network, blockNumberOrHash }) {
+  async getBlockWithTransactions({ network, hash }) {
     try {
       const rpcUrl = networkHelper.getRpcUrl(network);
       const provider = new ethers.JsonRpcProvider(rpcUrl);
-      const block = await provider.getBlock(blockNumberOrHash, true);
+      const block = await provider.getBlock(hash, true);
       return { network, block };
     } catch (error) {
       throw new Error(error.message || 'Failed to fetch block with full transactions!');
