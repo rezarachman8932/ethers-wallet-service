@@ -3,8 +3,13 @@ const AuditrailService = require('../services/auditrail.service');
 const AUDIT_ACTION = require('../constants/auditAction.constant');
 const response = require('../utils/response');
 const { StatusCodes } = require('http-status-codes');
-const { Platform } = require('../databases/models');
 
+/**
+ * getPlatform
+ * @param {Object} req
+ * @param {Object} res
+ * @returns
+ */
 const getPlatform = async (req, res) => {
   const data = await PlatformService.getAll();
 
@@ -18,6 +23,12 @@ const getPlatform = async (req, res) => {
   return response.response.success(res, 'Get platform successfully!', data);
 };
 
+/**
+ * createPlatform
+ * @param {Object} req
+ * @param {Object} res
+ * @returns
+ */
 const createPlatform = async (req, res) => {
   try {
     const { name, description } = req.body;
@@ -29,10 +40,7 @@ const createPlatform = async (req, res) => {
         StatusCodes.BAD_REQUEST
       );
 
-    const newPlatform = await Platform.create({
-      name,
-      description,
-    });
+    const newPlatform = await PlatformService.create({ name, description });
 
     await AuditrailService.create({
       action: AUDIT_ACTION.CREATE_PLATFORM,

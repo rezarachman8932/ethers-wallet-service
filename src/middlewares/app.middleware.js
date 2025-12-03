@@ -57,7 +57,8 @@ const authMiddleware = async (req, res, next) => {
 const authVerifyMiddleware = async (req, res, next) => {
   const { generateToken, verifySignature } = require('../utils/helper');
   try {
-    const authToken = req.headers['authorization'] || req.get('authorization');
+    const authToken =
+      req.headers['authorization'] || req.get('authorization') || req.headers['x-signature-key'];
     const accessKey = req.headers['x-wallet-access-key'] || req.get('x-wallet-access-key');
     // Check presence
     if (!accessKey || !authToken) {
@@ -110,4 +111,14 @@ const authVerifyMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = { authMiddleware, authVerifyMiddleware };
+const swaggerAuth = (req, res, next) => {
+  // eslint-disable-next-line camelcase
+  const { swagger_key } = req.query;
+  // eslint-disable-next-line camelcase
+  if (swagger_key && swagger_key === process.env.SWAGGER_KEY) {
+    return next();
+  }
+  return res.status(401).json({ message: 'Unauthorized: Invalid or missing swagger_key' });
+};
+
+module.exports = { authMiddleware, authVerifyMiddleware, swaggerAuth };

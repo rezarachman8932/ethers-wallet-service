@@ -73,6 +73,8 @@
     "sequelize": "^6.37.7",
     "sequelize-paper-trail": "^3.0.1",
     "signale": "^1.4.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "tmp": "^0.2.5",
     "url-parse": "^1.5.10",
     "uuid": "9.0.1",
