@@ -451,6 +451,46 @@ const estimateCostForTransferBalance = async (req, res) => {
   }
 };
 
+const getBlockWithTransactions = async (req, res) => {
+  try {
+    const { network, hash } = req.query;
+
+    if (!network || !hash) {
+      return response.response.error(
+        res,
+        "Query parameters of 'network' and 'hash' are required!",
+        null,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    const result = await ethersService.getBlockWithTransactions({
+      network,
+      hash,
+    });
+
+    await AuditrailService.create({
+      action: AUDIT_ACTION.GET_BLOCK_WITH_TRANSACTIONS,
+      header: req.headers,
+      body: req.body,
+      ipAddress: req.ip,
+    });
+
+    return response.response.success(
+      res,
+      'Block with full transactions fetched successfully!',
+      result
+    );
+  } catch (error) {
+    return response.response.error(
+      res,
+      'Failed to fetch block with transactions!',
+      error.message,
+      StatusCodes.UNPROCESSABLE_ENTITY
+    );
+  }
+};
+
 module.exports = {
   createWallet,
   getWalletByPrivateKey,
@@ -465,4 +505,5 @@ module.exports = {
   getBlockByHash,
   getBlockByNumber,
   estimateCostForTransferBalance,
+  getBlockWithTransactions,
 };
