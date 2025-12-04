@@ -81,7 +81,7 @@ class EthersServices {
       const contract = new ethers.Contract(contractAddress, abi, signerFromPrivateKey);
 
       let functionArgs = [];
-      let overrides = {};
+      const overrides = {};
 
       if (params) {
         if (typeof params === 'object' && !Array.isArray(params) && params.value !== undefined) {
@@ -105,7 +105,7 @@ class EthersServices {
       console.log(`Total Gas Cost: ${formatEther(totalCost)} ETH`);
       console.log(`Wallet Balance: ${formatEther(balance)} ETH`);
 
-      let canPerformAction = balance > totalCost;
+      const canPerformAction = balance > totalCost;
       console.log(`Can perform ${method} Transaction}: ${canPerformAction}`);
 
       return {
