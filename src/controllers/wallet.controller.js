@@ -204,7 +204,7 @@ const getTransactionDetail = async (req, res) => {
 
 const getGasEstimation = async (req, res) => {
   try {
-    const { privateKey, network, contractAddress, abi, method, params, from, value } = req.body;
+    const { privateKey, network, contractAddress, abi, method, params } = req.body;
 
     if (!network || !contractAddress || !abi || !method || !privateKey) {
       return response.response.error(
@@ -222,8 +222,6 @@ const getGasEstimation = async (req, res) => {
       abi,
       method,
       params,
-      from,
-      value,
     });
 
     await AuditrailService.create({
