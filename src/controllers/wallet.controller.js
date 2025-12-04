@@ -204,9 +204,9 @@ const getTransactionDetail = async (req, res) => {
 
 const getGasEstimation = async (req, res) => {
   try {
-    const { network, contractAddress, abi, method, params, from, value } = req.body;
+    const { privateKey, network, contractAddress, abi, method, params, from, value } = req.body;
 
-    if (!network || !contractAddress || !abi || !method || !from) {
+    if (!network || !contractAddress || !abi || !method || !privateKey) {
       return response.response.error(
         res,
         'Missing required fields (network, contractAddress, abi, method, from)!',
@@ -216,6 +216,7 @@ const getGasEstimation = async (req, res) => {
     }
 
     const gas = await EthersService.estimateGasForContractMethod({
+      privateKey,
       network,
       contractAddress,
       abi,

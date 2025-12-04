@@ -45,6 +45,24 @@ class NetworkHelper {
           apiKey: ETHERSCAN_API_KEY,
           chainId: 137,
         };
+      case 'sepolia':
+        return {
+          apiUrl: 'https://api.etherscan.io/v2/api',
+          apiKey: ETHERSCAN_API_KEY,
+          chainId: 11155111,
+        };
+      case 'amoy':
+        return {
+          apiUrl: 'https://api.etherscan.io/v2/api',
+          apiKey: ETHERSCAN_API_KEY,
+          chainId: 80002,
+        };
+      case 'mainnet':
+        return {
+          apiUrl: 'https://api.etherscan.io/v2/api',
+          apiKey: ETHERSCAN_API_KEY,
+          chainId: 1,
+        };
       default:
         throw new Error('Unsupported network');
     }

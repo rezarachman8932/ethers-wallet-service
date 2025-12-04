@@ -1,4 +1,4 @@
-const { ethers } = require('ethers');
+const { ethers, formatEther, formatUnits } = require('ethers');
 const networkHelper = require('../utils/networkHelper');
 
 class EthersServices {
@@ -66,32 +66,59 @@ class EthersServices {
   }
 
   async estimateGasForContractMethod({
+    privateKey,
     network,
     contractAddress,
     abi,
     method,
-    params = [],
-    from,
-    value,
+    params, // params can be a single value, an array, or an object with 'value'
   }) {
     try {
       const rpcUrl = networkHelper.getRpcUrl(network);
       const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const signerFromPrivateKey = new ethers.Wallet(privateKey, provider);
 
-      const overrides = {
-        from,
-        value: value ? ethers.parseEther(value.toString()) : undefined,
-      };
+      const contract = new ethers.Contract(contractAddress, abi, signerFromPrivateKey);
 
-      const contract = new ethers.Contract(contractAddress, abi, provider);
-      const gasEstimate = await contract[method].estimateGas(...(params || []), overrides);
+      let functionArgs = [];
+      let overrides = {};
+
+      if (params) {
+        if (typeof params === 'object' && !Array.isArray(params) && params.value !== undefined) {
+          overrides.value = ethers.parseEther(params.value.toString());
+        } else if (Array.isArray(params)) {
+          functionArgs = params;
+        } else {
+          functionArgs = [params];
+        }
+      }
+
+      const gasEstimate = await contract[method].estimateGas(...functionArgs, overrides);
+      const walletAddress = signerFromPrivateKey.address;
+      const balance = await signerFromPrivateKey.provider.getBalance(walletAddress);
+      const feeData = await signerFromPrivateKey.provider.getFeeData();
+      const gasPrice = feeData.gasPrice || feeData.maxFeePerGas;
+      const totalCost = gasEstimate * gasPrice;
+
+      console.log(`Gas Limit Estimate: ${gasEstimate.toString()} units`);
+      console.log(`Gas Price: ${formatUnits(gasPrice, 'gwei')} Gwei`);
+      console.log(`Total Gas Cost: ${formatEther(totalCost)} ETH`);
+      console.log(`Wallet Balance: ${formatEther(balance)} ETH`);
+
+      let canPerformAction = balance > totalCost;
+      console.log(`Can perform ${method} Transaction}: ${canPerformAction}`);
 
       return {
         gasEstimate: gasEstimate.toString(),
+        gasPrice: formatUnits(gasPrice, 'gwei'),
+        totalCost: formatEther(totalCost),
+        canPerformAction,
       };
     } catch (error) {
       console.error('[EthersService] Gas estimation error:', error);
-      throw new Error(error.reason || error.message || 'Failed to estimate gas');
+      throw new Error(
+        error.reason || error.shortMessage || error.message || 'Failed to estimate gas'
+      );
     }
   }
 
