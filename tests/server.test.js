@@ -8,7 +8,7 @@ describe('GET /', () => {
 
     assert.equal(res.status, 200);
     assert.equal(res.type, 'application/json');
-    assert.equal(res.body.message, 'Hello World!');
+    assert.equal(res.body.message, 'Service Running!');
   });
 });
 

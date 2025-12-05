@@ -594,4 +594,30 @@ describe('POST /api/v1/wallet', () => {
 
     assert.equal(lastRecord.action, 'GET_BLOCK_WITH_TRANSACTIONS');
   });
+
+  it('should fetch nonce successfully', async () => {
+    const body = {
+      network: 'ethereum',
+      address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+    };
+    const signatureKey = generateSignatureKey(body, token);
+
+    const res = await request(app)
+      .post('/api/v1/wallet/nonce')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${signatureKey}`)
+      .send(body);
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.message, 'Nonce fetched successfully!');
+
+    const count = await Auditrail.count();
+    const lastRecord = await Auditrail.findOne({
+      offset: count - 1,
+      order: [['id', 'ASC']],
+    });
+
+    assert.equal(lastRecord.action, 'GET_NONCE');
+  });
 });
