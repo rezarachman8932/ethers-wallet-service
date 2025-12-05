@@ -328,14 +328,16 @@ describe('POST /api/v1/wallet', () => {
     assert.ok(res.body.message.includes('Missing amount, fiatCurrency or cryptoSymbol!'));
   });
 
-  it('should estimate gas for increment() successfully', async () => {
+  it('should estimate gas for increment() successfully', async function () {
+    this.timeout(3000);
+
     const payload = {
+      privateKey: '322d52b9158b4351a7a85d2f2d316e6c81183de286c1531dbce7a5340a3f03d6',
       network: 'sepolia',
       contractAddress: '0x604204fdE0bf9efB9F55439D2f75c218e20D1B8d',
       abi,
       method: 'increment',
       params: [],
-      from: '0x732874c027304f60a0561631cD615C34D82965a9',
     };
 
     const signatureKey = generateSignatureKey(payload, token);
@@ -362,12 +364,12 @@ describe('POST /api/v1/wallet', () => {
 
   it('should estimate gas for getTotalReceived() successfully', async () => {
     const payload = {
+      privateKey: '322d52b9158b4351a7a85d2f2d316e6c81183de286c1531dbce7a5340a3f03d6',
       network: 'sepolia',
       contractAddress: '0x604204fdE0bf9efB9F55439D2f75c218e20D1B8d',
       abi,
       method: 'getTotalReceived',
       params: [],
-      from: '0x732874c027304f60a0561631cD615C34D82965a9',
     };
 
     const signatureKey = generateSignatureKey(payload, token);
