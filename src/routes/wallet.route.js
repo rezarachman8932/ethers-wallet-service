@@ -35,5 +35,6 @@ WalletRouter.get(
   authVerifyMiddleware,
   WalletController.getBlockWithTransactions
 );
+WalletRouter.post('/nonce', authVerifyMiddleware, WalletController.getNonce);
 
 module.exports = WalletRouter;
