@@ -3,6 +3,8 @@ const { keccak256 } = require('ethereumjs-util');
 const randomize = require('randomatic');
 const crypto = require('crypto');
 const { hashSync, genSaltSync, compareSync } = require('bcrypt');
+const networkHelper = require('../utils/networkHelper');
+const { ethers } = require('ethers');
 
 const isValidAddress = (address) => {
   try {
@@ -84,6 +86,26 @@ const verifySignature = (body, token, signatureToCheck) => {
   return newSignature === signatureToCheck;
 };
 
+const isContractAddress = async (network, address) => {
+  const rpcUrl = networkHelper.getRpcUrl(network);
+  const provider = new ethers.JsonRpcProvider(rpcUrl);
+  const code = await provider.getCode(address);
+  return code && code !== '0x' && code !== '0x0';
+};
+
+const isEOAAddress = async (provider, address) => !(await isContractAddress(provider, address));
+
+const checkAddressType = async (network, address) => {
+  const rpcUrl = networkHelper.getRpcUrl(network);
+  const provider = new ethers.JsonRpcProvider(rpcUrl);
+  const code = await provider.getCode(address);
+  const isContract = code && code !== '0x' && code !== '0x0';
+  return {
+    isContract,
+    isEOA: !isContract,
+  };
+};
+
 module.exports = {
   isValidAddress,
   isValidCertificateHash,
@@ -98,4 +120,7 @@ module.exports = {
   generatePlatformCredentials,
   generateSignatureKey,
   verifySignature,
+  isContractAddress,
+  isEOAAddress,
+  checkAddressType,
 };
