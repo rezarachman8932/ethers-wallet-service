@@ -257,6 +257,25 @@ class EthersServices {
       throw new Error(error.message || 'Failed to fetch block with full transactions!');
     }
   }
+
+  async getNonce(address, network) {
+    try {
+      const rpcUrl = networkHelper.getRpcUrl(network);
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+
+      const confirmedNonce = await provider.getTransactionCount(address, 'latest');
+      const pendingNonce = await provider.getTransactionCount(address, 'pending');
+
+      return {
+        address,
+        network,
+        confirmedNonce,
+        pendingNonce,
+      };
+    } catch (error) {
+      throw new Error(error.message || 'Failed to fetch nonce!');
+    }
+  }
 }
 
 module.exports = new EthersServices();

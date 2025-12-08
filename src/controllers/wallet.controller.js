@@ -490,6 +490,39 @@ const getBlockWithTransactions = async (req, res) => {
   }
 };
 
+const getNonce = async (req, res) => {
+  try {
+    const { address, network } = req.body;
+
+    if (!address || !network) {
+      return response.response.error(
+        res,
+        'Missing address or network in the request body!',
+        null,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    const result = await EthersService.getNonce(address, network);
+
+    await AuditrailService.create({
+      action: AUDIT_ACTION.GET_NONCE,
+      header: req.headers,
+      body: req.body,
+      ipAddress: req.ip,
+    });
+
+    return response.response.success(res, 'Nonce fetched successfully!', result);
+  } catch (error) {
+    return response.response.error(
+      res,
+      'Failed to fetch nonce!',
+      error.message,
+      StatusCodes.UNPROCESSABLE_ENTITY
+    );
+  }
+};
+
 module.exports = {
   createWallet,
   getWalletByPrivateKey,
@@ -505,4 +538,5 @@ module.exports = {
   getBlockByNumber,
   estimateCostForTransferBalance,
   getBlockWithTransactions,
+  getNonce,
 };
