@@ -12,7 +12,7 @@ const TOKEN_URI = "https://storage.googleapis.com/asset-demo-arvie/metadata-0021
 const EXPIRES_AT = 0;
 
 // Example document content (for hashing)
-const DOCUMENT_CONTENT = "Test new recipient document content";
+const DOCUMENT_CONTENT = "Test Dec 24";
 
 async function main() {
   // 1️⃣ Provider (Sepolia)
