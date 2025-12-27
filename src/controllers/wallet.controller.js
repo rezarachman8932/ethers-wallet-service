@@ -4,7 +4,6 @@ const AUDIT_ACTION = require('../constants/auditAction.constant');
 const AuditrailService = require('../services/auditrail.service');
 const EthersService = require('../services/ethers.service');
 const HistoryService = require('../services/history.service');
-
 const ethersService = require('../services/ethers.service');
 
 const createWallet = async (req, res) => {
@@ -196,6 +195,51 @@ const getTransactionDetail = async (req, res) => {
     return response.response.error(
       res,
       'Failed to fetch transaction detail!',
+      error.message,
+      StatusCodes.UNPROCESSABLE_ENTITY
+    );
+  }
+};
+
+const callSmartContractMethod = async (req, res) => {
+  try {
+    const { privateKey, network, contractAddress, abi, method, params } = req.body;
+    // privateKey is optional here for write methods
+    // params is optional depending on the method
+    if (!network || !contractAddress || !abi || !method) {
+      return response.response.error(
+        res,
+        'Missing required fields (network, contractAddress, abi, method)!',
+        null,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+
+    const result = await EthersService.callContractMethod({
+      privateKey,
+      network,
+      contractAddress,
+      abi,
+      method,
+      params,
+    });
+
+    await AuditrailService.create({
+      action: AUDIT_ACTION.CALL_SMART_CONTRACT_METHOD,
+      header: req.headers,
+      body: req.body,
+      ipAddress: req.ip,
+    });
+
+    return response.response.success(
+      res,
+      'Smart contract method executed successfully!',
+      result
+    );
+  } catch (error) {
+    return response.response.error(
+      res,
+      'Failed to execute smart contract method!',
       error.message,
       StatusCodes.UNPROCESSABLE_ENTITY
     );
@@ -539,4 +583,5 @@ module.exports = {
   estimateCostForTransferBalance,
   getBlockWithTransactions,
   getNonce,
+  callSmartContractMethod
 };
