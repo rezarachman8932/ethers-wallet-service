@@ -38,6 +38,16 @@ describe('POST /api/v1/wallet/call/smart-contract', () => {
     },
   ];
 
+  const abiReadOnly = [
+    {
+      "inputs": [{ "internalType": "uint256", "name": "tokenId", "type": "uint256" }],
+      "name": "isValid",
+      "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+  ];
+
   const basePayload = {
     network: 'sepolia',
     contractAddress: '0xFC360E992B9A6007b0F862f9ff1313FE18fEeCa7'
@@ -46,35 +56,36 @@ describe('POST /api/v1/wallet/call/smart-contract', () => {
   /**
    * ✅ READ
    */
-  // it('should call read-only contract method successfully', async function () {
-  //   const payload = {
-  //     ...basePayload,
-  //     method: 'getTotalReceived',
-  //     params: [],
-  //   };
+  it('should call read-only contract method successfully', async function () {
+    const payload = {
+      ...basePayload,
+      abi: abiReadOnly,
+      method: 'isValid',
+      params: [1],
+    };
 
-  //   const signatureKey = generateSignatureKey(payload, token);
+    const signatureKey = generateSignatureKey(payload, token);
 
-  //   const res = await request(app)
-  //     .post('/api/v1/wallet/call/smart-contract')
-  //     .set('Accept', 'application/json')
-  //     .set('x-wallet-access-key', validAccessKey)
-  //     .set('authorization', `Bearer ${signatureKey}`)
-  //     .send(payload);
+    const res = await request(app)
+      .post('/api/v1/wallet/call/smart-contract')
+      .set('Accept', 'application/json')
+      .set('x-wallet-access-key', validAccessKey)
+      .set('authorization', `Bearer ${signatureKey}`)
+      .send(payload);
 
-  //   assert.equal(res.status, 200);
-  //   assert.equal(res.body.message, 'Smart contract method executed successfully!');
-  //   assert.equal(res.body.data.type, 'read');
-  //   assert.ok(res.body.data.result !== undefined);
+    assert.equal(res.status, 200);
+    assert.equal(res.body.message, 'Smart contract method executed successfully!');
+    assert.equal(res.body.data.type, 'read');
+    assert.ok(res.body.data.result !== undefined);
 
-  //   const count = await Auditrail.count();
-  //   const record = await Auditrail.findOne({
-  //     offset: count - 1,
-  //     order: [['id', 'ASC']],
-  //   });
+    const count = await Auditrail.count();
+    const record = await Auditrail.findOne({
+      offset: count - 1,
+      order: [['id', 'ASC']],
+    });
 
-  //   assert.equal(record.action, 'CALL_SMART_CONTRACT_METHOD');
-  // });
+    assert.equal(record.action, 'CALL_SMART_CONTRACT_METHOD');
+  });
 
   /**
    * ✅ WRITE
@@ -125,32 +136,4 @@ describe('POST /api/v1/wallet/call/smart-contract', () => {
 
     assert.equal(record.action, 'CALL_SMART_CONTRACT_METHOD');
   });
-
-  /**
-   * ❌ FAIL
-   */
-  // it('should fail when calling write method without privateKey', async () => {
-  //   const payload = {
-  //     ...basePayload,
-  //     method: 'increment',
-  //     params: [],
-  //   };
-
-  //   const signatureKey = generateSignatureKey(payload, token);
-
-  //   const res = await request(app)
-  //     .post('/api/v1/wallet/call/smart-contract')
-  //     .set('Accept', 'application/json')
-  //     .set('x-wallet-access-key', validAccessKey)
-  //     .set('authorization', `Bearer ${signatureKey}`)
-  //     .send(payload);
-
-  //   assert.equal(res.status, 422);
-  //   assert.ok(
-  //     res.body.message.includes('Failed to execute smart contract method!')
-  //   );
-  //   assert.ok(
-  //     res.body.error.includes('Private key required for state-changing methods!')
-  //   );
-  // });
 });
