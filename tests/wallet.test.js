@@ -65,11 +65,11 @@ describe('POST /api/v1/wallet', () => {
 
     const count = await Auditrail.count();
     const secondRecord = await Auditrail.findOne({
-      offset: 1,
+      offset: 3,
       order: [['id', 'ASC']],
     });
 
-    assert.equal(count, 2);
+    assert.equal(count, 4);
     assert.equal(secondRecord.action, 'CREATE_WALLET');
   });
 
@@ -92,11 +92,11 @@ describe('POST /api/v1/wallet', () => {
 
     const count = await Auditrail.count();
     const thirdRecord = await Auditrail.findOne({
-      offset: 2,
+      offset: 4,
       order: [['id', 'ASC']],
     });
 
-    assert.equal(count, 3);
+    assert.equal(count, 5);
     assert.equal(thirdRecord.action, 'GET_WALLET_BY_PRIVATE_KEY');
   });
 
@@ -132,11 +132,11 @@ describe('POST /api/v1/wallet', () => {
 
     const count = await Auditrail.count();
     const fourthRecord = await Auditrail.findOne({
-      offset: 3,
+      offset: 5,
       order: [['id', 'ASC']],
     });
 
-    assert.equal(count, 4);
+    assert.equal(count, 6);
     assert.equal(fourthRecord.action, 'GET_WALLET_BY_MNEMONIC');
   });
 

@@ -19,6 +19,7 @@ WalletRouter.post(
   authVerifyMiddleware,
   WalletController.getTransactionDetail
 );
+WalletRouter.post('/call/smart-contract', authVerifyMiddleware, WalletController.callSmartContractMethod);
 WalletRouter.post('/estimate', authVerifyMiddleware, WalletController.getGasEstimation);
 WalletRouter.get('/gas-price', authVerifyMiddleware, WalletController.getGasPrice);
 WalletRouter.post('/transfer', authVerifyMiddleware, WalletController.transfer);

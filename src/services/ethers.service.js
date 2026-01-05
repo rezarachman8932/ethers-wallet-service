@@ -122,6 +122,85 @@ class EthersServices {
     }
   }
 
+  async callContractMethod({
+    privateKey,
+    network,
+    contractAddress,
+    abi,
+    method,
+    params = [],
+    overrides = {}, // e.g. { value: "0.1" }
+  }) {
+    try {
+      const rpcUrl = networkHelper.getRpcUrl(network);
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const signer = privateKey
+        ? new ethers.Wallet(privateKey, provider)
+        : provider;
+      const contract = new ethers.Contract(contractAddress, abi, signer);
+
+      let fragment;
+
+      try {
+        // Check function existence via ABI
+        fragment = contract.interface.getFunction(method);
+      } catch {
+        return {
+          exists: false,
+          method,
+          error: `Method "${method}" not found in contract ABI!`,
+        };
+      }
+
+      // Normalize params
+      const functionArgs = Array.isArray(params) ? params : [params];
+
+      // Handle ETH value override
+      if (overrides.value !== undefined) {
+        overrides.value = ethers.parseEther(overrides.value.toString());
+      }
+
+      // Determine call type
+      const isReadOnly =
+        fragment.stateMutability === 'view' ||
+        fragment.stateMutability === 'pure';
+
+      // Call dynamically
+      if (isReadOnly) {
+        const result = await contract[method](...functionArgs);
+        return {
+          exists: true,
+          method,
+          type: 'read',
+          result,
+        };
+      }
+
+      // Write (transaction)
+      if (!privateKey) {
+        throw new Error('Private key required for state-changing methods!');
+      }
+
+      const tx = await contract[method](...functionArgs, overrides);
+      const receipt = await tx.wait();
+
+      return {
+        exists: true,
+        method,
+        type: 'write',
+        txHash: tx.hash,
+        receipt,
+      };
+    } catch (error) {
+      throw new Error(
+        error.reason ||
+        error.shortMessage ||
+        error.message ||
+        'Failed to call contract method!'
+      );
+    }
+  }
+
   async transferNativeToken({ network, to, amount, privateKey }) {
     try {
       const rpcUrl = networkHelper.getRpcUrl(network);
