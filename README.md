@@ -1,4 +1,4 @@
-# kc-wallet-svc
+# ethers-wallet-service
 
 A RESTful wallet service built with **Node.js** and **Express** that provides crypto wallet management, blockchain interactions, fiat-to-crypto conversion, and smart contract integration via [ethers.js](https://docs.ethers.org/v6/).
 
